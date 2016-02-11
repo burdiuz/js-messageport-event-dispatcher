@@ -2,13 +2,52 @@
  * Created by Oleg Galaburda on 09.02.16.
  */
 
+var MessagePortEvent = (function() {
+
+
+  function MessagePortEvent(event, dispatcherId) {
+    this.event = event;
+    this.dispatcherId = dispatcherId;
+  }
+
+  function toJSON() {
+    return {
+      event: MessagePortDispatcher.toJSON(this.event),
+      dispatcherId: this.dispatcherId
+    };
+  }
+  MessagePortEvent.prototype.toJSON = toJSON;
+
+  function fromJSON(object) {
+    var result = MessagePortDispatcher.fromJSON(object);
+    if (MessagePortEvent.isEvent(object)) {
+      result.event = MessagePortDispatcher.fromJSON(result.event);
+    } else {
+      result = null;
+    }
+    return result;
+  }
+  MessagePortEvent.fromJSON = fromJSON;
+
+  function isEvent(object) {
+    return EventDispatcher.isObject(object) && object.hasOwnProperty('dispatcherId') && object.hasOwnProperty('event');
+  }
+  MessagePortEvent.isEvent = isEvent;
+
+  return MessagePortEvent;
+})();
+
 /**
  *
  * @param port {Window|Worker|MessagePort}
  * @constructor
  */
-function MessagePortDispatcher(target) {
+function MessagePortDispatcher(target, customPostMessageHandler) {
   target = target || self;
+  var _dispatcherId = 'MP/' + String(Math.ceil(Math.random() * 10000)) + '/' + String(Date.now());
+  var postMessageHandler = customPostMessageHandler || function(data, transferList) {
+      target.postMessage(data, this.targetOrigin, transferList);
+    };
   /**
    * @type {EventDispatcher}
    */
@@ -19,20 +58,23 @@ function MessagePortDispatcher(target) {
   var _receiver = new EventDispatcher();
 
   function messageHandler(event) {
-    var messageEvent = MessagePortDispatcher.fromJSON(event.data);
-    if (EventDispatcher.isObject(messageEvent) && messageEvent.hasOwnProperty('type')) {
-      _receiver.dispatchEvent(messageEvent);
+    var message = MessagePortEvent.fromJSON(event.data);
+    if (message) {
+      if (message.dispatcherId === _dispatcherId) {
+        _sender.dispatchEvent(message.event);
+      } else {
+        _receiver.dispatchEvent(message.event);
+      }
     }
-
   }
 
   function dispatchEvent(event, data, transferList) {
     event = EventDispatcher.getEvent(event, data);
-    var eventJson = MessagePortDispatcher.toJSON(event);
-    port.postMessage(eventJson, transferList);
-    _sender.dispatchEvent(event);
+    var eventJson = MessagePortDispatcher.toJSON(new MessagePortEvent(event, _dispatcherId));
+    postMessageHandler.call(this, eventJson, transferList);
   }
 
+  this.targetOrigin = '*';
   this.addEventListener = _receiver.addEventListener;
   this.hasEventListener = _receiver.hasEventListener;
   this.removeEventListener = _receiver.removeEventListener;
@@ -60,10 +102,10 @@ function MessagePortDispatcher(target) {
 
 MessagePortDispatcher.toJSON = function(object) {
   var objectJson;
-  if (object.hasOwnProperty('toJSON') && typeof(object.toJSON) === 'function') {
-    objectJson = event.toJSON();
+  if (typeof(object.toJSON) === 'function') {
+    objectJson = object.toJSON();
   } else {
-    objectJson = JSON.stringify(event);
+    objectJson = JSON.stringify(object);
   }
   return objectJson;
 };
@@ -78,8 +120,8 @@ MessagePortDispatcher.fromJSON = function(data) {
     } catch (error) {
       // this isn't an event we are waiting for.
     }
-    return object;
   }
+  return object;
 };
 
 var _self = null;
