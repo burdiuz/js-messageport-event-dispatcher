@@ -83,16 +83,16 @@ function MessagePortDispatcher(target, customPostMessageHandler) {
 
   Object.defineProperties(this, {
     sender: {
-      value: _sender,
-      enumerable: false
+      value: _sender
     },
     receiver: {
-      value: _receiver,
-      enumerable: false
+      value: _receiver
     },
     target: {
-      value: target,
-      enumerable: false
+      value: target
+    },
+    dispatcherId: {
+      value: _dispatcherId
     }
   });
 
