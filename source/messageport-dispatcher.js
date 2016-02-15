@@ -20,7 +20,7 @@ var MessagePortEvent = (function() {
 
   function fromJSON(object) {
     var result = MessagePortDispatcher.fromJSON(object);
-    if (MessagePortEvent.isEvent(object)) {
+    if (MessagePortEvent.isEvent(result)) {
       result.event = MessagePortDispatcher.fromJSON(result.event);
     } else {
       result = null;
@@ -99,7 +99,14 @@ function MessagePortDispatcher(target, customPostMessageHandler) {
   target.addEventListener('message', messageHandler);
 }
 
-
+/**
+ * If toJSON method implemented on object, it will be called instead of converting to JSON string.
+ * This was made to utilize structured cloning algorithm for raw objects.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+ * In this case developer is responsible for converting linked objects.
+ * @param object
+ * @returns {Object|String}
+ */
 MessagePortDispatcher.toJSON = function(object) {
   var objectJson;
   if (typeof(object.toJSON) === 'function') {
@@ -109,7 +116,11 @@ MessagePortDispatcher.toJSON = function(object) {
   }
   return objectJson;
 };
-
+/**
+ *
+ * @param data {Object|String}
+ * @returns {Object}
+ */
 MessagePortDispatcher.fromJSON = function(data) {
   var object; // keep it undefined in case of error
   if (EventDispatcher.isObject(data)) {

@@ -7,11 +7,11 @@ var gulp = require("gulp"),
   include = require("gulp-include");
 
 gulp.task('build', function() {
-  gulp.src('source/messageport-event-dispatcher-umd.js')
+  gulp.src('source/messageport-dispatcher-umd.js')
     // create concatenated file
     .pipe(include())
     .on('error', console.log)
-    .pipe(rename('messageport-event-dispatcher.js'))
+    .pipe(rename('messageport-dispatcher.js'))
     .pipe(gulp.dest('dist'))
     // create minified version
     .pipe(uglify())
