@@ -1,5 +1,5 @@
 {
-  "name": "messageport-event-dispatcher",
+  "name": "messageport-dispatcher",
   "description": "Cross-domain EventDispatcher for MessagePort interface",
   "version": "0.0.1",
   "main": [
