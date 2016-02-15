@@ -16,7 +16,7 @@
     root.MessagePortDispatcher = factory(root.EventDispatcher);
   }
 }(this, function (EventDispatcher) {
-  // here should be injected messageport-event-dispatcher.js content
-  //=require messageport-event-dispatcher.js
+  // here should be injected messageport-dispatcher.js content
+  //=require messageport-dispatcher.js
   return MessagePortDispatcher;
 }));
