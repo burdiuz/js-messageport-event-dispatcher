@@ -80,7 +80,12 @@ describe('MessagePortDispatcher', function() {
     });
   });
   describe('fromJSON()', function() {
-
+    it('should accept object as parameter', function() {
+      expect(MessagePortDispatcher.fromJSON({something: '123'})).to.be.eql({something: '123'});
+    });
+    it('should accept string as parameter', function() {
+      expect(MessagePortDispatcher.fromJSON(JSON.stringify({something: '123'}))).to.be.eql({something: '123'});
+    });
   });
   describe('Instance', function() {
     it('should have property with sender EventDispatcher', function() {
