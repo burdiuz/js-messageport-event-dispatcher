@@ -1,7 +1,7 @@
 {
   "name": "messageport-dispatcher",
   "description": "Cross-domain EventDispatcher for MessagePort interface",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/messageport-event-dispatcher.min.js",
   "keywords": [
     "events",
@@ -30,6 +30,7 @@
     "event-dispatcher": "git://github.com/burdiuz/js-event-dispatcher.git"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "express": "^4.13.3",
     "gulp": "^3.9.0",
     "gulp-include": "^2.1.0",
@@ -41,8 +42,11 @@
     "karma-mocha": "^0.2.1",
     "karma-phantomjs-launcher": "^0",
     "karma-sinon-chai": "^1.1.0",
+    "lolex": "^1.4.0",
     "mocha": "^2.4.5",
-    "phantomjs": "^1.9"
+    "phantomjs": "^1.9",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS karma.conf.js"
