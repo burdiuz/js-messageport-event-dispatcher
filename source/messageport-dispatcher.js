@@ -39,10 +39,13 @@ var MessagePortEvent = (function() {
 
 /**
  *
- * @param port {Window|Worker|MessagePort}
+ * @param target {Window|Worker|MessagePort}
+ * @param customPostMessageHandler {?Function} Function that receive message object and pass it to MessagePort.postMessage()
+ * @param receiverEventPreprocessor {?Function} Function that pre-process all events received from MessagePort, before passing to listeners
+ * @param senderEventPreprocessor Function that pre-process all events sent to MessagePort
  * @constructor
  */
-function MessagePortDispatcher(target, customPostMessageHandler) {
+function MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
   target = target || self;
   var _dispatcherId = 'MP/' + String(Math.ceil(Math.random() * 10000)) + '/' + String(Date.now());
   var postMessageHandler = customPostMessageHandler || function(data, transferList) {
@@ -51,11 +54,11 @@ function MessagePortDispatcher(target, customPostMessageHandler) {
   /**
    * @type {EventDispatcher}
    */
-  var _sender = new EventDispatcher();
+  var _sender = new EventDispatcher(senderEventPreprocessor);
   /**
    * @type {EventDispatcher}
    */
-  var _receiver = new EventDispatcher();
+  var _receiver = new EventDispatcher(receiverEventPreprocessor);
 
   function messageHandler(event) {
     var message = MessagePortEvent.fromJSON(event.data);
@@ -138,23 +141,36 @@ MessagePortDispatcher.fromJSON = function(data) {
 var _self = null;
 var _parent = null;
 var _top = null;
-MessagePortDispatcher.self = function() {
+/**
+ * @param receiverEventPreprocessor {?Function}
+ * @param senderEventPreprocessor {?Function}
+ * @returns {MessagePortDispatcher}
+ */
+MessagePortDispatcher.self = function(receiverEventPreprocessor, senderEventPreprocessor) {
   if (!_self) {
-    _self = new MessagePortDispatcher(self);
+    _self = new MessagePortDispatcher(self, null, receiverEventPreprocessor, senderEventPreprocessor);
   }
   return _self;
 };
-
-MessagePortDispatcher.parent = function() {
+/**
+ * @param receiverEventPreprocessor {?Function}
+ * @param senderEventPreprocessor {?Function}
+ * @returns {MessagePortDispatcher}
+ */
+MessagePortDispatcher.parent = function(receiverEventPreprocessor, senderEventPreprocessor) {
   if (!_parent) {
-    _parent = new MessagePortDispatcher(parent);
+    _parent = new MessagePortDispatcher(parent, null, receiverEventPreprocessor, senderEventPreprocessor);
   }
   return _parent;
 };
-
-MessagePortDispatcher.top = function() {
+/**
+ * @param receiverEventPreprocessor {?Function}
+ * @param senderEventPreprocessor {?Function}
+ * @returns {MessagePortDispatcher}
+ */
+MessagePortDispatcher.top = function(receiverEventPreprocessor, senderEventPreprocessor) {
   if (!_top) {
-    _top = new MessagePortDispatcher(top);
+    _top = new MessagePortDispatcher(top, null, receiverEventPreprocessor, senderEventPreprocessor);
   }
   return _top;
 };

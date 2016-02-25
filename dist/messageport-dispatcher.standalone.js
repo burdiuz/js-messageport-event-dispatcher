@@ -125,12 +125,12 @@
          * 3. In this method create function StoppableEvent that will extend from this event and add these functions,
          *    then instantiate it for this one cycle.
          */
-         event.stopPropagation = stopPropagation;
-         event.stopImmediatePropagation = stopImmediatePropagation;
+        event.stopPropagation = stopPropagation;
+        event.stopImmediatePropagation = stopImmediatePropagation;
         /*
-        var rmStopPropagation = EventDispatcher.setupOptional(event, 'stopPropagation', stopPropagation);
-        var rmStopImmediatePropagation = EventDispatcher.setupOptional(event, 'stopImmediatePropagation', stopImmediatePropagation);
-        */
+         var rmStopPropagation = EventDispatcher.setupOptional(event, 'stopPropagation', stopPropagation);
+         var rmStopImmediatePropagation = EventDispatcher.setupOptional(event, 'stopImmediatePropagation', stopImmediatePropagation);
+         */
         var priorities = getHashByKey(event.type, this._listeners);
         if (priorities) {
           var list = Object.getOwnPropertyNames(priorities).sort(function(a, b) {
@@ -151,9 +151,9 @@
         delete event.stopPropagation;
         delete event.stopImmediatePropagation;
         /*
-        rmStopPropagation();
-        rmStopImmediatePropagation();
-        */
+         rmStopPropagation();
+         rmStopImmediatePropagation();
+         */
       }
     
       function createList(eventType, priority, target) {
@@ -191,8 +191,12 @@
     
       return EventListeners;
     })();
-    
-    function EventDispatcher() {
+    /**
+     *
+     * @param eventPreprocessor {?Function}
+     * @constructor
+     */
+    function EventDispatcher(eventPreprocessor) {
       /**
        * @type {EventListeners}
        */
@@ -215,7 +219,11 @@
       }
     
       function dispatchEvent(event, data) {
-        _listeners.call(EventDispatcher.getEvent(event, data));
+        var eventObject = EventDispatcher.getEvent(event, data);
+        if (eventPreprocessor) {
+          eventObject = eventPreprocessor.call(this, eventObject);
+        }
+        _listeners.call(eventObject);
       }
     
       this.addEventListener = addEventListener;
@@ -234,21 +242,21 @@
     }
     
     /*
-    function setupOptional(target, name, value) {
-      var cleaner = null;
-      if (name in target) {
-        cleaner = function() {
-        };
-      } else {
-        target[name] = value;
-        cleaner = function() {
-          delete target[name];
-        };
-      }
-      return cleaner;
-    }
-    EventDispatcher.setupOptional = setupOptional;
-    */
+     function setupOptional(target, name, value) {
+     var cleaner = null;
+     if (name in target) {
+     cleaner = function() {
+     };
+     } else {
+     target[name] = value;
+     cleaner = function() {
+     delete target[name];
+     };
+     }
+     return cleaner;
+     }
+     EventDispatcher.setupOptional = setupOptional;
+     */
     
     EventDispatcher.isObject = isObject;
     
@@ -299,10 +307,13 @@
   
   /**
    *
-   * @param port {Window|Worker|MessagePort}
+   * @param target {Window|Worker|MessagePort}
+   * @param customPostMessageHandler {?Function} Function that receive message object and pass it to MessagePort.postMessage()
+   * @param receiverEventPreprocessor {?Function} Function that pre-process all events received from MessagePort, before passing to listeners
+   * @param senderEventPreprocessor Function that pre-process all events sent to MessagePort
    * @constructor
    */
-  function MessagePortDispatcher(target, customPostMessageHandler) {
+  function MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
     target = target || self;
     var _dispatcherId = 'MP/' + String(Math.ceil(Math.random() * 10000)) + '/' + String(Date.now());
     var postMessageHandler = customPostMessageHandler || function(data, transferList) {
@@ -311,11 +322,11 @@
     /**
      * @type {EventDispatcher}
      */
-    var _sender = new EventDispatcher();
+    var _sender = new EventDispatcher(senderEventPreprocessor);
     /**
      * @type {EventDispatcher}
      */
-    var _receiver = new EventDispatcher();
+    var _receiver = new EventDispatcher(receiverEventPreprocessor);
   
     function messageHandler(event) {
       var message = MessagePortEvent.fromJSON(event.data);
@@ -398,23 +409,36 @@
   var _self = null;
   var _parent = null;
   var _top = null;
-  MessagePortDispatcher.self = function() {
+  /**
+   * @param receiverEventPreprocessor {?Function}
+   * @param senderEventPreprocessor {?Function}
+   * @returns {MessagePortDispatcher}
+   */
+  MessagePortDispatcher.self = function(receiverEventPreprocessor, senderEventPreprocessor) {
     if (!_self) {
-      _self = new MessagePortDispatcher(self);
+      _self = new MessagePortDispatcher(self, null, receiverEventPreprocessor, senderEventPreprocessor);
     }
     return _self;
   };
-  
-  MessagePortDispatcher.parent = function() {
+  /**
+   * @param receiverEventPreprocessor {?Function}
+   * @param senderEventPreprocessor {?Function}
+   * @returns {MessagePortDispatcher}
+   */
+  MessagePortDispatcher.parent = function(receiverEventPreprocessor, senderEventPreprocessor) {
     if (!_parent) {
-      _parent = new MessagePortDispatcher(parent);
+      _parent = new MessagePortDispatcher(parent, null, receiverEventPreprocessor, senderEventPreprocessor);
     }
     return _parent;
   };
-  
-  MessagePortDispatcher.top = function() {
+  /**
+   * @param receiverEventPreprocessor {?Function}
+   * @param senderEventPreprocessor {?Function}
+   * @returns {MessagePortDispatcher}
+   */
+  MessagePortDispatcher.top = function(receiverEventPreprocessor, senderEventPreprocessor) {
     if (!_top) {
-      _top = new MessagePortDispatcher(top);
+      _top = new MessagePortDispatcher(top, null, receiverEventPreprocessor, senderEventPreprocessor);
     }
     return _top;
   };
