@@ -284,6 +284,7 @@
         dispatcherId: this.dispatcherId
       };
     }
+  
     MessagePortEvent.prototype.toJSON = toJSON;
   
     function fromJSON(object) {
@@ -295,11 +296,13 @@
       }
       return result;
     }
+  
     MessagePortEvent.fromJSON = fromJSON;
   
     function isEvent(object) {
       return EventDispatcher.isObject(object) && object.hasOwnProperty('dispatcherId') && object.hasOwnProperty('event');
     }
+  
     MessagePortEvent.isEvent = isEvent;
   
     return MessagePortEvent;
@@ -322,7 +325,7 @@
     /**
      * @type {EventDispatcher}
      */
-    var _sender = new EventDispatcher(senderEventPreprocessor);
+    var _sender = new EventDispatcher();
     /**
      * @type {EventDispatcher}
      */
@@ -341,6 +344,9 @@
   
     function dispatchEvent(event, data, transferList) {
       event = EventDispatcher.getEvent(event, data);
+      if (senderEventPreprocessor) {
+        event = senderEventPreprocessor.call(this, event);
+      }
       var eventJson = MessagePortDispatcher.toJSON(new MessagePortEvent(event, _dispatcherId));
       postMessageHandler.call(this, eventJson, transferList);
     }
