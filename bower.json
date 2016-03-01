@@ -3,7 +3,7 @@
   "description": "Cross-domain EventDispatcher for MessagePort interface",
   "version": "0.0.2",
   "main": [
-    "dist/messageport-event-dispatcher.min.js"
+    "dist/messageport-dispatcher.min.js"
   ],
   "moduleType": [
     "amd",
@@ -28,6 +28,7 @@
   "keywords": [
     "events",
     "webworker",
+    "messageport",
 	"crossdomain",
 	"postMessage",
     "message",
