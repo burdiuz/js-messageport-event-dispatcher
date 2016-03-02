@@ -128,7 +128,8 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
  - **hasEventListener**(eventType:String):Boolean - method copied from `receiver` EventDispatcher for easier access
  - **removeEventListener**(eventType:String, listener:Function):void - method copied from `receiver` EventDispatcher for easier access
  - **removeAllEventListeners**(eventType:String):void - method copied from `receiver` EventDispatcher for easier access
- - **dispatchEvent**(event:Object):void - does not fire event, it sends event to `postMessage()`. Also accepts two arguments: `dispatchEvent(eventType:String, data?:Object):void`
+ - **dispatchEvent**(event:Object):void - does not fire event, it sends event to `postMessage()`. Can be used with two arguments:
+  - dispatchEvent(eventType:String, data?:Object):void
 
 #### MessagePortDispatcher static members
  - **toJSON**(data:Object):Object|String - Convers event to JSON string or if `event.data` field contains object with 'toJSON()' method, will call it and return Object with its return value.  *Methods `toJSON()` and `fromJSON()` can be replaced with custom implementations.*
