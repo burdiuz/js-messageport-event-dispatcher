@@ -25,9 +25,11 @@ To start using EventDispatcher, just instantiate it
 var dispatcher = new MessagePortDispatcher(iframe.contentWindow);
 ```
 As first argument its constructor accepts object that implements messaging methods of [MessagePort](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) interface.
-*  [postMessage(message:Object)](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort/postMessage)
-*  [addEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
-*  [removeEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener)
+
+ - [postMessage(message:Object)](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort/postMessage)
+ - [addEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+ - [removeEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener)  
+
 Window object or Dedicated Worker can be used, to communicate with other side of communication channel(send event to script in IFRAME or from IFRAME or to Worker).  To have custom events working on both sides, MessagePortDispatcher instances should be created from both sides of communication channel.
 In outer document pass IFRAME's window object
 ```javascript
