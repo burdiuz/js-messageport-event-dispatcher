@@ -28,7 +28,21 @@ As first argument its constructor accepts object that implements messaging metho
 *  [postMessage(message:Object)](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort/postMessage)
 *  [addEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
 *  [removeEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener)
-Window object or Dedicated Worker can be used, to communicate with other side. 
+Window object or Dedicated Worker can be used, to communicate with other side of communication channel(send event to script in IFRAME or from IFRAME or to Worker).  To have custom events working on both sides, MessagePortDispatcher instances should be created from both sides of communication channel.
+In outer document pass IFRAME's window object
+```javascript
+var frameDispatcher = new MessagePortDispatcher(iframeNode.contentWindow);
+frameDispatcher.addEventListener('initialized', function() {
+	console.log('Ok, we can start communication.');
+});
+```
+In IFRAME use `window.self`
+```javascript
+var dispatcher = MessagePortDispatcher.self();
+dispatcher.dispatchEvent('initialized');
+```
+Instances returned from `MessagePortDispatcher.self()`, `MessagePortDispatcher.parent()` and `MessagePortDispatcher.top()` are cached internally, so will always return same instance.
+
 Its possible to write an adapter for any object and pass it into MessagePortDispatcher
 ```javascript
 var target = {
@@ -69,3 +83,28 @@ Since MessagePortDispatcher passes data between origins,it can send only simple 
 Project contains example in `example` folder, it shows how to use MessagePortDispatcher when communicating with frames.
 
 ## API
+
+#### MessagePortDispatcher constructor arguments
+ - **target:Object** - Requred, target object, should have postMessage(), addEventListener(), removeEventListener() methods, asdescribed in [MessagePort docs](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).
+ - **customPostMessageHandler:Function** -  will be used to call `target.postMessage()`
+ - **receiverEventPreprocessor:Function** - Optional, allows pre-processing of events and their data before firing event.
+ - **senderEventPreprocessor:Function** - Optional, , allows pre-processing of events and their data before passing them to `postMessage` or `customPostMessageHandler`.
+
+#### MessagePortDispatcher instance members
+ - **targetOrigin:String**
+ - **sender:EventDispatcher** - fires events that are passed to `postMessage()`
+ - **receiver:EventDispatcher** - fires events received from other origin
+ - **target:Object** - target object that is used for communication
+ - **dispatcherId:String** - unique ID of current MessagePortDispatcher instance
+ - **addEventListener(eventType:String, listener:Function):void** - method copied from `receiver` EventDispatcher for easier access
+ - **hasEventListener(eventType:String):Boolean** - method copied from `receiver` EventDispatcher for easier access
+ - **removeEventListener(eventType:String, listener:Function):void** - method copied from `receiver` EventDispatcher for easier access
+ - **removeAllEventListeners(eventType:String):void** - method copied from `receiver` EventDispatcher for easier access
+ - **dispatchEvent(event:Object):void** - does not fire event, it sends event to `postMessage()`. Also accepts two arguments: `dispatchEvent(eventType:String, data?:Object):void`
+
+#### MessagePortDispatcher static members
+ - **toJSON(data:Object):Object|String** - Convers event to JSON string or if `event.data` field contains object with 'toJSON()' method, will call it and return Object with its return value.  *Methods `toJSON()` and `fromJSON()` can be replaced with custom implementations.*
+ - **fromJSON(data:Object|String):Object** - Accepts Object or String, JSON String. If string passed, it will be converted to Object with "JSON.parse()".
+ - **self(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher** - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.self, WorkerGlobalScope.self).
+ - **parent(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher** - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.parent).
+ - **top(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher** - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.top).
