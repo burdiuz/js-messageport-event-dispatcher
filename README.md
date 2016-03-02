@@ -87,26 +87,26 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
 ## API
 
 #### MessagePortDispatcher constructor arguments
- - **target:Object** - Requred, target object, should have postMessage(), addEventListener(), removeEventListener() methods, asdescribed in [MessagePort docs](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).
- - **customPostMessageHandler:Function** -  will be used to call `target.postMessage()`
- - **receiverEventPreprocessor:Function** - Optional, allows pre-processing of events and their data before firing event.
- - **senderEventPreprocessor:Function** - Optional, , allows pre-processing of events and their data before passing them to `postMessage` or `customPostMessageHandler`.
+ - **target**:Object - Requred, target object, should have postMessage(), addEventListener(), removeEventListener() methods, asdescribed in [MessagePort docs](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).
+ - **customPostMessageHandler**:Function -  will be used to call `target.postMessage()`
+ - **receiverEventPreprocessor**:Function - Optional, allows pre-processing of events and their data before firing event.
+ - **senderEventPreprocessor**:Function - Optional, , allows pre-processing of events and their data before passing them to `postMessage` or `customPostMessageHandler`.
 
 #### MessagePortDispatcher instance members
- - **targetOrigin:String**
- - **sender:EventDispatcher** - fires events that are passed to `postMessage()`
- - **receiver:EventDispatcher** - fires events received from other origin
- - **target:Object** - target object that is used for communication
- - **dispatcherId:String** - unique ID of current MessagePortDispatcher instance
- - **addEventListener(eventType:String, listener:Function):void** - method copied from `receiver` EventDispatcher for easier access
- - **hasEventListener(eventType:String):Boolean** - method copied from `receiver` EventDispatcher for easier access
- - **removeEventListener(eventType:String, listener:Function):void** - method copied from `receiver` EventDispatcher for easier access
- - **removeAllEventListeners(eventType:String):void** - method copied from `receiver` EventDispatcher for easier access
- - **dispatchEvent(event:Object):void** - does not fire event, it sends event to `postMessage()`. Also accepts two arguments: `dispatchEvent(eventType:String, data?:Object):void`
+ - **targetOrigin**:String
+ - **sender**:EventDispatcher - fires events that are passed to `postMessage()`
+ - **receiver**:EventDispatcher - fires events received from other origin
+ - **target**:Object - target object that is used for communication
+ - **dispatcherId**:String - unique ID of current MessagePortDispatcher instance
+ - **addEventListener**(eventType:String, listener:Function):void - method copied from `receiver` EventDispatcher for easier access
+ - **hasEventListener**(eventType:String):Boolean - method copied from `receiver` EventDispatcher for easier access
+ - **removeEventListener**(eventType:String, listener:Function):void - method copied from `receiver` EventDispatcher for easier access
+ - **removeAllEventListeners**(eventType:String):void - method copied from `receiver` EventDispatcher for easier access
+ - **dispatchEvent**(event:Object):void - does not fire event, it sends event to `postMessage()`. Also accepts two arguments: `dispatchEvent(eventType:String, data?:Object):void`
 
 #### MessagePortDispatcher static members
- - **toJSON(data:Object):Object|String** - Convers event to JSON string or if `event.data` field contains object with 'toJSON()' method, will call it and return Object with its return value.  *Methods `toJSON()` and `fromJSON()` can be replaced with custom implementations.*
- - **fromJSON(data:Object|String):Object** - Accepts Object or String, JSON String. If string passed, it will be converted to Object with "JSON.parse()".
- - **self(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher** - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.self, WorkerGlobalScope.self).
- - **parent(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher** - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.parent).
- - **top(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher** - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.top).
+ - **toJSON**(data:Object):Object|String - Convers event to JSON string or if `event.data` field contains object with 'toJSON()' method, will call it and return Object with its return value.  *Methods `toJSON()` and `fromJSON()` can be replaced with custom implementations.*
+ - **fromJSON**(data:Object|String):Object - Accepts Object or String, JSON String. If string passed, it will be converted to Object with "JSON.parse()".
+ - **self**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.self, WorkerGlobalScope.self).
+ - **parent**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.parent).
+ - **top**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.top).
