@@ -120,8 +120,8 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
 
 #### MessagePortDispatcher instance members
  - **targetOrigin**:String
- - **sender**:EventDispatcher - fires events that are passed to `postMessage()`
- - **receiver**:EventDispatcher - fires events received from other origin
+ - **sender**:EventDispatcher - fires outgoing events that are passed to `postMessage()`
+ - **receiver**:EventDispatcher - fires incoming events received from other origin
  - **target**:Object - target object that is used for communication
  - **dispatcherId**:String - unique ID of current MessagePortDispatcher instance
  - **addEventListener**(eventType:String, listener:Function):void - method copied from `receiver` EventDispatcher for easier access
