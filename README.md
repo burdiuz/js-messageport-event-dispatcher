@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/burdiuz/js-messageport-event-dispatcher.svg?branch=master)](https://travis-ci.org/burdiuz/js-messageport-event-dispatcher)
 [![Coverage Status](https://coveralls.io/repos/github/burdiuz/js-messageport-event-dispatcher/badge.svg?branch=master)](https://coveralls.io/github/burdiuz/js-messageport-event-dispatcher?branch=master)
 
-MessagePortDispatcher is extended API for cross-origin communication. It utilizes [MessagePort API](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) available on `window` object to send custom events into/from &lt;IFRAME/&gt; or other target that implements MessagePort interface. MessagePortDispatcher uses two [EventDispatcher's](https://github.com/burdiuz/js-event-dispatcher) to sent and received events internally.
+MessagePortDispatcher is extended API for cross-origin communication. It utilizes [MessagePort API](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) available on `window` object to send custom events into/from &lt;IFRAME/&gt; or other target that implements MessagePort interface. MessagePortDispatcher uses two [EventDispatcher's](https://github.com/burdiuz/js-event-dispatcher) for incoming and outgoing events internally.
 
 
 ## Installation
@@ -76,7 +76,7 @@ console.log('Data received', event.data);
 ```
 When `MessagePortDispatcher.dispatchEvent()` called, it actually calls `postMessage()` method to pass message to other side. So instead of using `postMessage` and listening to `message` event, with MessagePortDispatcher you can send and receive custom events.  
 
-When MessagePortDispatcher instantiated, it creates two EventDispatcher's, one for sent events and second for received. Since Window object fires `message` event for both sides, under the hood MessagePortDispatcher adds own ID to each event and if received event has same ID, it will be fired via`sender` EventDispatcher, otherwise via `receiver`.
+When MessagePortDispatcher instantiated, it creates two EventDispatcher's, one for incoming events and second for outgoing. Since Window object fires same `message` event for both sides, under the hood MessagePortDispatcher adds own ID to each event and if received event has same ID, it will be fired via`sender`(outgoing event) EventDispatcher, otherwise via `receiver`(incoming event).
 This will not work, event `someEvent` will be fired on other side but not for this dispatcher:
 ```javascript
 dispatcher.addEventListener('someEvent', function(){
@@ -84,14 +84,14 @@ dispatcher.addEventListener('someEvent', function(){
 });
 dispatcher.dispatchEvent('someEvent');
 ```
-If you want to listen for sent events, use `sender`:
+If you want to listen for outgoing events, use `sender`:
 ```javascript
 dispatcher.sender.addEventListener('someEvent', function(){
 	console.log('Some Event Received!');
 });
 dispatcher.dispatchEvent('someEvent');
 ```
-This gives confidence that in cases when developer will use same event types on both sides, he will receive proper events on other side.
+Using same event types on both sides of communication channel will not mix them, since they will be fired from different dispatchers.
 
 MessagePortDispatcher has exposed methods from `receiver` EventDispatcher for easier usage and custom `dispatchEvent()` method that sends events using `MessagePort.postMessage()`.
 These two calls are equivalent:
@@ -106,7 +106,7 @@ dispatcher.sender.dispatchEvent('someEvent');
 ```
 `sender.dispatchEvent()` will just fire event from sender EventDispatcher, but `MessagePortDispatcher.dispatchEvent()` will actually send message to other side via `postMessage()`.
 
-Since MessagePortDispatcher passes data between origins, it can send only simple data(i.e. nothing can be sent by reference) that can be converted to JSON. Before sending event, it checks its data property value. If this value has method `toJSON()`, it will use it and send returned data as is. In other case the value will be converted to JSON string to send and converted back when received. When using `toJSON()` method its developer's responsibility to look for nested data objects and convert everything to transferable simple objects.
+Since MessagePortDispatcher passes data between origins, it can send only simple data(i.e. nothing can be sent by reference) that can be converted to JSON. Before sending event, it checks its data property value. If this value has method `toJSON()`, it will use it and send returned data as is. In other case the value will be converted to JSON string before being sent and converted back when received. When using `toJSON()` method its developer's responsibility to look for nested data objects and convert everything to transferable simple objects.
 
 Project contains example in `example` folder, it shows how to use MessagePortDispatcher when communicating with frames.
 
