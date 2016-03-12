@@ -38,17 +38,17 @@
   
     MessagePortEvent.prototype.toJSON = toJSON;
   
-    function fromJSON(object) {
-      var result = MessagePortDispatcher.fromJSON(object);
+    function parse(object) {
+      var result = MessagePortDispatcher.parse(object);
       if (MessagePortEvent.isEvent(result)) {
-        result.event = MessagePortDispatcher.fromJSON(result.event);
+        result.event = MessagePortDispatcher.parse(result.event);
       } else {
         result = null;
       }
       return result;
     }
   
-    MessagePortEvent.fromJSON = fromJSON;
+    MessagePortEvent.parse = parse;
   
     function isEvent(object) {
       return EventDispatcher.isObject(object) && object.hasOwnProperty('dispatcherId') && object.hasOwnProperty('event');
@@ -67,138 +67,182 @@
    * @param senderEventPreprocessor Function that pre-process all events sent to MessagePort
    * @constructor
    */
-  function MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
-    target = target || self;
-    var _dispatcherId = 'MP/' + String(Math.ceil(Math.random() * 10000)) + '/' + String(Date.now());
-    var postMessageHandler = customPostMessageHandler || function(data, transferList) {
-        target.postMessage(data, this.targetOrigin, transferList);
-      };
-    /**
-     * @type {EventDispatcher}
-     */
-    var _sender = new EventDispatcher();
-    /**
-     * @type {EventDispatcher}
-     */
-    var _receiver = new EventDispatcher(receiverEventPreprocessor);
+  var MessagePortDispatcher = (function() {
+    var NOINIT = {};
+    var HANDLERS_FIELD = Symbol('message.port.dispatcher::handlers');
   
-    function messageHandler(event) {
-      var message = MessagePortEvent.fromJSON(event.data);
+    function MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
+      if (target === NOINIT) {
+        return;
+      }
+      target = target || self;
+      this[HANDLERS_FIELD] = {
+        customPostMessageHandler: customPostMessageHandler,
+        senderEventPreprocessor: senderEventPreprocessor
+      };
+  
+      Object.defineProperties(this, {
+        /**
+         * @type {EventDispatcher}
+         */
+        sender: {
+          value: EventDispatcher.create()
+        },
+        /**
+         * @type {EventDispatcher}
+         */
+        receiver: {
+          value: EventDispatcher.create(receiverEventPreprocessor)
+        },
+        target: {
+          value: target
+        },
+        dispatcherId: {
+          value: 'MP/' + String(Math.ceil(Math.random() * 10000)) + '/' + String(Date.now())
+        }
+      });
+  
+      this.targetOrigin = '*';
+      this.addEventListener = this.receiver.addEventListener.bind(this.receiver);
+      this.hasEventListener = this.receiver.hasEventListener.bind(this.receiver);
+      this.removeEventListener = this.receiver.removeEventListener.bind(this.receiver);
+      this.removeAllEventListeners = this.receiver.removeAllEventListeners.bind(this.receiver);
+  
+      target.addEventListener('message', this._messageEventListener.bind(this));
+    }
+  
+    function _dispatchEvent(event, data, transferList) {
+      event = EventDispatcher.getEvent(event, data);
+      if (this[HANDLERS_FIELD].senderEventPreprocessor) {
+        event = this[HANDLERS_FIELD].senderEventPreprocessor.call(this, event);
+      }
+      var eventJson = MessagePortDispatcher.toJSON(new MessagePortEvent(event, this.dispatcherId));
+      this._postMessageHandler(eventJson, transferList);
+    }
+  
+    function __postMessageHandler(data, transferList) {
+      var handler = this[HANDLERS_FIELD].customPostMessageHandler;
+      if (handler) {
+        handler.call(this, data, transferList);
+      } else {
+        this.target.postMessage(data, this.targetOrigin, transferList);
+      }
+    }
+  
+    function __messageEventListener(event) {
+      var message = MessagePortEvent.parse(event.data);
       if (message) {
-        if (message.dispatcherId === _dispatcherId) {
-          _sender.dispatchEvent(message.event);
+        if (message.dispatcherId === this.dispatcherId) {
+          this.sender.dispatchEvent(message.event);
         } else {
-          _receiver.dispatchEvent(message.event);
+          this.receiver.dispatchEvent(message.event);
         }
       }
     }
   
-    function dispatchEvent(event, data, transferList) {
-      event = EventDispatcher.getEvent(event, data);
-      if (senderEventPreprocessor) {
-        event = senderEventPreprocessor.call(this, event);
+    MessagePortDispatcher.prototype = EventDispatcher.createNoInitPrototype();
+    MessagePortDispatcher.prototype.constructor = MessagePortDispatcher;
+    MessagePortDispatcher.prototype.dispatchEvent = _dispatchEvent;
+    /**
+     * @private
+     */
+    MessagePortDispatcher.prototype._messageEventListener = __messageEventListener;
+    /**
+     * @private
+     */
+    MessagePortDispatcher.prototype._postMessageHandler = __postMessageHandler;
+  
+    //----------------- static
+  
+    var _self = null;
+    var _parent = null;
+    var _top = null;
+  
+    function MessagePortDispatcher_toJSON(object) {
+      var objectJson;
+      if (typeof(object.toJSON) === 'function') {
+        objectJson = object.toJSON();
+      } else {
+        objectJson = JSON.stringify(object);
       }
-      var eventJson = MessagePortDispatcher.toJSON(new MessagePortEvent(event, _dispatcherId));
-      postMessageHandler.call(this, eventJson, transferList);
+      return objectJson;
     }
   
-    this.targetOrigin = '*';
-    this.addEventListener = _receiver.addEventListener;
-    this.hasEventListener = _receiver.hasEventListener;
-    this.removeEventListener = _receiver.removeEventListener;
-    this.removeAllEventListeners = _receiver.removeAllEventListeners;
-    this.dispatchEvent = dispatchEvent;
-  
-    Object.defineProperties(this, {
-      sender: {
-        value: _sender
-      },
-      receiver: {
-        value: _receiver
-      },
-      target: {
-        value: target
-      },
-      dispatcherId: {
-        value: _dispatcherId
+    function MessagePortDispatcher_parse(data) {
+      var object; // keep it undefined in case of error
+      if (EventDispatcher.isObject(data)) {
+        object = data;
+      } else {
+        try {
+          object = JSON.parse(data);
+        } catch (error) {
+          // this isn't an event we are waiting for.
+        }
       }
-    });
-  
-    target.addEventListener('message', messageHandler);
-  }
-  
-  /**
-   * If toJSON method implemented on object, it will be called instead of converting to JSON string.
-   * This was made to utilize structured cloning algorithm for raw objects.
-   * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
-   * In this case developer is responsible for converting linked objects.
-   * @param object
-   * @returns {Object|String}
-   */
-  MessagePortDispatcher.toJSON = function(object) {
-    var objectJson;
-    if (typeof(object.toJSON) === 'function') {
-      objectJson = object.toJSON();
-    } else {
-      objectJson = JSON.stringify(object);
+      return object;
     }
-    return objectJson;
-  };
-  /**
-   *
-   * @param data {Object|String}
-   * @returns {Object}
-   */
-  MessagePortDispatcher.fromJSON = function(data) {
-    var object; // keep it undefined in case of error
-    if (EventDispatcher.isObject(data)) {
-      object = data;
-    } else {
-      try {
-        object = JSON.parse(data);
-      } catch (error) {
-        // this isn't an event we are waiting for.
+  
+    function MessagePortDispatcher_self() {
+      if (!_self) {
+        _self = new MessagePortDispatcher(self);
       }
+      return _self;
     }
-    return object;
-  };
   
-  var _self = null;
-  var _parent = null;
-  var _top = null;
-  /**
-   * @param receiverEventPreprocessor {?Function}
-   * @param senderEventPreprocessor {?Function}
-   * @returns {MessagePortDispatcher}
-   */
-  MessagePortDispatcher.self = function(receiverEventPreprocessor, senderEventPreprocessor) {
-    if (!_self) {
-      _self = new MessagePortDispatcher(self, null, receiverEventPreprocessor, senderEventPreprocessor);
+    function MessagePortDispatcher_parent() {
+      if (!_parent) {
+        _parent = new MessagePortDispatcher(parent);
+      }
+      return _parent;
     }
-    return _self;
-  };
-  /**
-   * @param receiverEventPreprocessor {?Function}
-   * @param senderEventPreprocessor {?Function}
-   * @returns {MessagePortDispatcher}
-   */
-  MessagePortDispatcher.parent = function(receiverEventPreprocessor, senderEventPreprocessor) {
-    if (!_parent) {
-      _parent = new MessagePortDispatcher(parent, null, receiverEventPreprocessor, senderEventPreprocessor);
+  
+    function MessagePortDispatcher_top() {
+      if (!_top) {
+        _top = new MessagePortDispatcher(top);
+      }
+      return _top;
     }
-    return _parent;
-  };
-  /**
-   * @param receiverEventPreprocessor {?Function}
-   * @param senderEventPreprocessor {?Function}
-   * @returns {MessagePortDispatcher}
-   */
-  MessagePortDispatcher.top = function(receiverEventPreprocessor, senderEventPreprocessor) {
-    if (!_top) {
-      _top = new MessagePortDispatcher(top, null, receiverEventPreprocessor, senderEventPreprocessor);
+  
+    function MessagePortDispatcher_create(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
+      return new MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor);
     }
-    return _top;
-  };
+  
+    function MessagePortDispatcher_createNoInitPrototype() {
+      return new MessagePortDispatcher(NOINIT);
+    }
+  
+    /**
+     * If toJSON method implemented on object, it will be called instead of converting to JSON string.
+     * This was made to utilize structured cloning algorithm for raw objects.
+     * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+     * In this case developer is responsible for converting linked objects.
+     * @param object
+     * @returns {Object|String}
+     */
+    MessagePortDispatcher.toJSON = MessagePortDispatcher_toJSON;
+    /**
+     *
+     * @param data {Object|String}
+     * @returns {Object}
+     */
+    MessagePortDispatcher.parse = MessagePortDispatcher_parse;
+    /**
+     * @returns {MessagePortDispatcher}
+     */
+    MessagePortDispatcher.self = MessagePortDispatcher_self;
+    /**
+     * @returns {MessagePortDispatcher}
+     */
+    MessagePortDispatcher.parent = MessagePortDispatcher_parent;
+    /**
+     * @returns {MessagePortDispatcher}
+     */
+    MessagePortDispatcher.top = MessagePortDispatcher_top;
+    MessagePortDispatcher.create = MessagePortDispatcher_create;
+    MessagePortDispatcher.createNoInitPrototype = MessagePortDispatcher_createNoInitPrototype;
+  
+    return MessagePortDispatcher;
+  })();
   
   return MessagePortDispatcher;
 }));
