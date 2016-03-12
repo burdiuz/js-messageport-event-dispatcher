@@ -110,6 +110,19 @@ Since MessagePortDispatcher passes data between origins, it can send only simple
 
 Project contains example in `example` folder, it shows how to use MessagePortDispatcher when communicating with frames.
 
+## Inheritance
+For custom classes which extend MessagePortDispatcher there are available "husk" MessagePortDispatcher versions to use as custom class prototype.
+```javascript
+function MyClass() {
+  MessagePortDispatcher.apply(this);
+}
+MyClass.prototype = MessagePortDispatcher.createNoInitPrototype();
+MyClass.prototype.constructor = MyClass;
+
+var instance = new MyClass();
+console.log(instance instanceof MessagePortDispatcher); // true
+```
+
 ## API
 
 #### MessagePortDispatcher constructor arguments
