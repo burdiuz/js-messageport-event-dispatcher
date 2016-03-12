@@ -145,8 +145,10 @@ console.log(instance instanceof MessagePortDispatcher); // true
   - dispatchEvent(eventType:String, data?:Object):void
 
 #### MessagePortDispatcher static members
- - **toJSON**(data:Object):Object|String - Convers event to JSON string or if `event.data` field contains object with 'toJSON()' method, will call it and return Object with its return value.  *Methods `toJSON()` and `fromJSON()` can be replaced with custom implementations.*
- - **fromJSON**(data:Object|String):Object - Accepts Object or String, JSON String. If string passed, it will be converted to Object with "JSON.parse()".
+ - **toJSON**(data:Object):Object|String - Convers event to JSON string or if `event.data` field contains object with 'toJSON()' method, will call it and return Object with its return value.  *Methods `toJSON()` and `parse()` can be replaced with custom implementations.*
+ - **parse**(data:Object|String):Object - Accepts Object or String, JSON String. If string passed, it will be converted to Object with "JSON.parse()".
  - **self**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.self, WorkerGlobalScope.self).
  - **parent**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.parent).
  - **top**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.top).
+ - **create**(target:MessagePort, customPostMessageHandler?:Function, receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Factory method for MessagePortDispatcher instances. Arguments list identical to MessagePortDispatcher constructor.
+ - **createNoInitPrototype**():MessagePortDispatcher - Creates "husk" version of MessagePortDispatcher to use as custom classes prototype.
