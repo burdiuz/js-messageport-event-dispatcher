@@ -40,13 +40,13 @@ describe('MessagePortEvent', function() {
       });
     });
   });
-  describe('fromJSON()', function() {
+  describe('parse()', function() {
     it('should accept JSON string as parameter', function() {
       var jsonString = JSON.stringify({
         event: {type: 'my-event'},
         dispatcherId: 'asdfgh'
       });
-      expect(MessagePortEvent.fromJSON(jsonString)).to.be.eql({
+      expect(MessagePortEvent.parse(jsonString)).to.be.eql({
         event: {type: 'my-event'},
         dispatcherId: 'asdfgh'
       });
@@ -56,13 +56,13 @@ describe('MessagePortEvent', function() {
         event: JSON.stringify({type: 'my-event'}),
         dispatcherId: 'password'
       };
-      expect(MessagePortEvent.fromJSON(jsonString)).to.be.eql({
+      expect(MessagePortEvent.parse(jsonString)).to.be.eql({
         event: {type: 'my-event'},
         dispatcherId: 'password'
       });
     });
     it('should accept object as parameter', function() {
-      expect(MessagePortEvent.fromJSON({
+      expect(MessagePortEvent.parse({
         event: {type: 'my-event'},
         dispatcherId: '111111'
       })).to.be.eql({
@@ -71,7 +71,7 @@ describe('MessagePortEvent', function() {
         });
     });
     it('should return null if no \'event\' field', function() {
-      expect(MessagePortEvent.fromJSON({dispatcherId: '123456789'})).to.be.null;
+      expect(MessagePortEvent.parse({dispatcherId: '123456789'})).to.be.null;
     });
   });
   describe('isEvent()', function() {

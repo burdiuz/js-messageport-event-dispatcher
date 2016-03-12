@@ -4,10 +4,10 @@
 describe('MessagePortDispatcher', function() {
   function MessagePortMock() {
     var _dispatcher = new EventDispatcher();
-    this.addEventListener = sinon.spy(_dispatcher.addEventListener);
-    this.hasEventListener = sinon.spy(_dispatcher.hasEventListener);
-    this.removeEventListener = sinon.spy(_dispatcher.removeEventListener);
-    this.dispatchEvent = _dispatcher.dispatchEvent;
+    this.addEventListener = sinon.spy(_dispatcher.addEventListener.bind(_dispatcher));
+    this.hasEventListener = sinon.spy(_dispatcher.hasEventListener.bind(_dispatcher));
+    this.removeEventListener = sinon.spy(_dispatcher.removeEventListener.bind(_dispatcher));
+    this.dispatchEvent = _dispatcher.dispatchEvent.bind(_dispatcher);
     this.postMessage = sinon.spy();
   }
 
@@ -79,12 +79,12 @@ describe('MessagePortDispatcher', function() {
       });
     });
   });
-  describe('fromJSON()', function() {
+  describe('parse()', function() {
     it('should accept object as parameter', function() {
-      expect(MessagePortDispatcher.fromJSON({something: '123'})).to.be.eql({something: '123'});
+      expect(MessagePortDispatcher.parse({something: '123'})).to.be.eql({something: '123'});
     });
     it('should accept string as parameter', function() {
-      expect(MessagePortDispatcher.fromJSON(JSON.stringify({something: '123'}))).to.be.eql({something: '123'});
+      expect(MessagePortDispatcher.parse(JSON.stringify({something: '123'}))).to.be.eql({something: '123'});
     });
   });
   describe('Instance', function() {

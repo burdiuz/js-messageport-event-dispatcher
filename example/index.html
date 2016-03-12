@@ -28,7 +28,7 @@
         }
       }
 
-      var leftDispatcher = new MessagePortDispatcher($('#left').get(0).contentWindow);
+      var leftDispatcher = MessagePortDispatcher.create($('#left').get(0).contentWindow);
       leftDispatcher.addEventListener('initialized', function() {
         leftDispatcher.dispatchEvent('handshake', {name: 'Left'});
         leftInitialized = true;
@@ -38,7 +38,7 @@
         rightDispatcher.dispatchEvent('dataReceived', event.data);
       });
 
-      var rightDispatcher = new MessagePortDispatcher($('#right').get(0).contentWindow);
+      var rightDispatcher = MessagePortDispatcher.create($('#right').get(0).contentWindow);
       rightDispatcher.addEventListener('initialized', function() {
         rightDispatcher.dispatchEvent('handshake', {name: 'Right'});
         rightInitialized = true;
