@@ -1,7 +1,7 @@
 {
   "name": "messageport-dispatcher",
   "description": "Cross-domain EventDispatcher for MessagePort interface",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": [
     "dist/messageport-dispatcher.min.js"
   ],

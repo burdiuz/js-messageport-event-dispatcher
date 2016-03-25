@@ -17,7 +17,7 @@
   }
 }(this, function() {
   var EventDispatcher = (function() {
-    //=include ../bower_components/event-dispatcher/source/event-dispatcher.js
+    //=include ../node_modules/event-dispatcher/source/event-dispatcher.js
     return EventDispatcher;
   })();
   // here should be injected messageport-dispatcher.js content
