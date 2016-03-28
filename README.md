@@ -131,7 +131,7 @@ console.log(instance instanceof MessagePortDispatcher); // true
  - **receiverEventPreprocessor**:Function - Optional, allows pre-processing of events and their data before firing event.
  - **senderEventPreprocessor**:Function - Optional, , allows pre-processing of events and their data before passing them to `postMessage` or `customPostMessageHandler`.
 
-#### MessagePortDispatcher instance members
+#### MessagePortDispatcher instance members 
  - **targetOrigin**:String
  - **sender**:EventDispatcher - fires outgoing events that are passed to `postMessage()`
  - **receiver**:EventDispatcher - fires incoming events received from other origin
