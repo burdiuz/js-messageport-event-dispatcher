@@ -45,6 +45,43 @@ describe('MessagePortDispatcher', function() {
     expect(MessagePortDispatcher.top().target).to.be.equal(top);
   });
 
+  describe('When using pre-processors', function() {
+    var dispatcher, sendPreprocessor, recieverPreprocessor;
+    beforeEach(function() {
+      sendPreprocessor = sinon.spy(function(event) {
+        return event;
+      });
+      recieverPreprocessor = sinon.spy(function(event) {
+        return event;
+      });
+      dispatcher = new MessagePortDispatcher(messagePort, null, recieverPreprocessor, sendPreprocessor);
+    });
+    describe('When sending event', function() {
+      beforeEach(function() {
+        dispatcher.dispatchEvent('sentEvent');
+      });
+      it('should call preprocessor for sent event', function() {
+        expect(sendPreprocessor).to.be.calledOnce;
+        expect(sendPreprocessor.getCall(0).args[0].type).to.be.equal('sentEvent');
+      });
+    });
+    describe('When receiving event', function() {
+      beforeEach(function() {
+        messagePort.dispatchEvent('message', {
+          event: {
+            type: 'receivedEvent',
+            data: null
+          },
+          dispatcherId: 'not-this-dispatcher'
+        });
+      });
+      it('should call preprocessor for received event', function() {
+        expect(recieverPreprocessor).to.be.calledOnce;
+        expect(recieverPreprocessor.getCall(0).args[0].type).to.be.equal('receivedEvent');
+      });
+    });
+  });
+
   describe('toJSON()', function() {
     describe('When toJSON is defined', function() {
       var object = null;
@@ -85,6 +122,47 @@ describe('MessagePortDispatcher', function() {
     });
     it('should accept string as parameter', function() {
       expect(MessagePortDispatcher.parse(JSON.stringify({something: '123'}))).to.be.eql({something: '123'});
+    });
+  });
+  describe('create()', function() {
+    var dispatcher, customHandler, sendPreprocessor, recieverPreprocessor;
+    beforeEach(function() {
+      customHandler = sinon.spy();
+      sendPreprocessor = sinon.spy(function(event) {
+        return event;
+      });
+      recieverPreprocessor = sinon.spy(function(event) {
+        return event;
+      });
+      dispatcher = MessagePortDispatcher.create(messagePort, customHandler, recieverPreprocessor, sendPreprocessor);
+      dispatcher.dispatchEvent('sentEvent');
+      messagePort.dispatchEvent('message', {
+        event: {
+          type: 'receivedEvent',
+          data: null
+        },
+        dispatcherId: 'not-this-dispatcher'
+      });
+    });
+    it('should create dispatcher', function(){
+      expect(dispatcher).to.be.an.instanceof(MessagePortDispatcher);
+    });
+    it('should save custom handler', function() {
+      expect(customHandler).to.be.calledOnce;
+      expect(customHandler.getCall(0).args[0].event.type).to.be.equal('sentEvent');
+    });
+    it('should call preprocessor for sent event', function() {
+      expect(sendPreprocessor).to.be.calledOnce;
+      expect(sendPreprocessor.getCall(0).args[0].type).to.be.equal('sentEvent');
+    });
+    it('should call preprocessor for received event', function() {
+      expect(recieverPreprocessor).to.be.calledOnce;
+      expect(recieverPreprocessor.getCall(0).args[0].type).to.be.equal('receivedEvent');
+    });
+  });
+  describe('createNoInitPrototype()', function() {
+    it('should create instanceof MessagePortDispatcher', function() {
+      expect(MessagePortDispatcher.createNoInitPrototype()).to.be.an.instanceof(MessagePortDispatcher);
     });
   });
   describe('Instance', function() {
