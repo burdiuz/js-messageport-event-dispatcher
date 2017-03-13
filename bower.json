@@ -6,9 +6,7 @@
     "dist/messageport-dispatcher.min.js"
   ],
   "moduleType": [
-    "amd",
-    "globals",
-    "node"
+    "globals"
   ],
   "license": "MIT",
   "authors": [
@@ -17,34 +15,29 @@
   "ignore": [
     "**/.*",
     "tests",
-    "gulpfile.js",
     "karma.conf.js",
     "package.json",
     "server.js",
     "node_modules",
     "bower_components",
-    "test"
+    "webpack.config.js",
+    "webpack.config.main.js",
+    "webpack.helpers.js"
   ],
   "keywords": [
     "events",
-    "webworker",
-    "messageport",
-	"crossdomain",
-	"postMessage",
-    "message",
-    "worker",
+    "object",
     "fire",
     "handle",
     "listener",
     "dispatcher"
   ],
-  "homepage": "https://github.com/burdiuz/js-messageport-event-dispatcher",
+  "homepage": "https://github.com/burdiuz/js-event-dispatcher",
   "repository": {
     "type": "git",
-    "url": "git://github.com/burdiuz/js-messageport-event-dispatcher.git"
+    "url": "git://github.com/burdiuz/js-event-dispatcher.git"
   },
   "dependencies": {
-	"event-dispatcher": "git://github.com/burdiuz/js-event-dispatcher.git"
   },
   "devDependencies": {
   }

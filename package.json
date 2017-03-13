@@ -2,7 +2,7 @@
   "name": "messageport-dispatcher",
   "description": "Cross-domain EventDispatcher for MessagePort interface",
   "version": "0.0.4",
-  "main": "dist/messageport-event-dispatcher.min.js",
+  "main": "dist/messageport-dispatcher.js",
   "keywords": [
     "events",
     "webworker",
@@ -15,39 +15,53 @@
     "listener",
     "dispatcher"
   ],
-  "homepage": "https://github.com/burdiuz/js-messageport-event-dispatcher",
+  "homepage": "https://github.com/burdiuz/js-lib-environment",
   "bugs": {
-    "url": "https://github.com/burdiuz/js-messageport-event-dispatcher/issues",
+    "url": "https://github.com/burdiuz/js-lib-environment/issues",
     "email": "burdiuz@gmail.com"
   },
   "license": "MIT",
   "author": "Oleg Galaburda <burdiuz@gmail.com> (http://actualwave.com/)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/burdiuz/js-messageport-event-dispatcher.git"
+    "url": "https://github.com/burdiuz/js-lib-environment.git"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.24.0",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.4.0",
+    "babel-plugin-istanbul": "^4.0.0",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-preset-latest": "^6.24.0",
+    "chai": "^3.5.0",
+    "eslint": "^3.17.1",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.0",
+    "flow-bin": "^0.41.0",
+    "karma": "^1.5.0",
+    "karma-coverage": "^1.1.1",
+    "karma-coveralls": "^1.1.2",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-mocha": "^1.3.0",
+    "karma-sinon-chai": "^1.2.4",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^2.0.2",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7",
+    "sinon-chai": "^2.8.0",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.1",
     "event-dispatcher": "git://github.com/burdiuz/js-event-dispatcher.git"
   },
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "express": "^4.13.3",
-    "gulp": "^3.9.0",
-    "gulp-include": "^2.1.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^1.5.1",
-    "karma": "^0.13.16",
-    "karma-coverage": "^0.5.3",
-    "karma-coveralls": "^1.1.2",
-    "karma-mocha": "^0.2.1",
-    "karma-firefox-launcher": "^0",
-    "karma-sinon-chai": "^1.1.0",
-    "lolex": "^1.4.0",
-    "mocha": "^2.4.5",
-    "sinon": "^1.17.3",
-    "sinon-chai": "^2.8.0"
-  },
   "scripts": {
+    "start": "webpack",
+    "lint": "./node_modules/.bin/eslint \"source/**/!(*.spec).js\"",
+    "lint:spec": "./node_modules/.bin/eslint -c eslintrc.spec.json \"source/**/*.spec.js\"",
+    "flow": "./node_modules/.bin/flow",
+    "server": "./node_modules/.bin/webpack-dev-server --port 8081 --config webpack.config.main.js --open",
     "test": "./node_modules/.bin/karma start --single-run --browsers Firefox karma.conf.js"
   }
 }
