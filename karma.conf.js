@@ -5,7 +5,7 @@ module.exports = (config) => {
     frameworks: ['mocha', 'sinon-chai'],
     files: [
       'source/**/*.spec.js',
-	  'tests/**/*.spec.js',
+      'tests/**/*.spec.js',
     ],
     exclude: [],
 
