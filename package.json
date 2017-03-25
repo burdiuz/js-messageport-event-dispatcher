@@ -1,8 +1,8 @@
 {
   "name": "messageport-dispatcher",
   "description": "Cross-domain EventDispatcher for MessagePort interface",
-  "version": "0.0.4",
-  "main": "dist/messageport-dispatcher.js",
+  "version": "1.0.5",
+  "main": "src/index.js",
   "keywords": [
     "events",
     "webworker",
@@ -26,7 +26,9 @@
     "type": "git",
     "url": "https://github.com/burdiuz/js-lib-environment.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "event-dispatcher": "git://github.com/burdiuz/js-event-dispatcher.git"
+  },
   "devDependencies": {
     "babel-core": "^6.24.0",
     "babel-eslint": "^7.1.1",
@@ -53,8 +55,7 @@
     "sinon": "^1.17.7",
     "sinon-chai": "^2.8.0",
     "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.4.1",
-    "event-dispatcher": "git://github.com/burdiuz/js-event-dispatcher.git"
+    "webpack-dev-server": "^2.4.1"
   },
   "scripts": {
     "start": "webpack",

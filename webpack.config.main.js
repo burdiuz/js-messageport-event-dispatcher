@@ -20,7 +20,7 @@ module.exports = {
         include: [
           p('source'),
           p('tests'),
-          p('node_modules/event-dispatcher/source'),
+          p('node_modules/event-dispatcher'),
         ],
         loader: 'babel-loader'
       }

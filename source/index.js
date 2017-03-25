@@ -1,8 +1,4 @@
-export const obj = {};
-export const myFunc = () => {};
-export class MyClass {
-	myMethod(){
-		return true;
-	}
-}
-export default 'Oh My!';
+import MessagePortDispatcher, { MessagePortEvent } from './MessagePortDispatcher';
+
+export default MessagePortDispatcher;
+export { MessagePortEvent };

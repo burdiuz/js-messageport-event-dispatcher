@@ -2,25 +2,36 @@
  * Created by Oleg Galaburda on 09.02.16.
  */
 
-import SymbolImpl from './SymbolImpl';
-import EventDispatcher from './EventDispatcher';
+import EventDispatcher from 'event-dispatcher';
 
-class MessagePortEvent {
-  constructor(event, dispatcherId) {
+import type {
+  EventObject,
+  EventListener,
+  EventProcessor,
+  PostMessage,
+  IMessagePortEvent,
+  MessagePortTarget,
+} from './TypeDefinition';
+
+export class MessagePortEvent implements IMessagePortEvent {
+  constructor(event: EventObject, dispatcherId: string) {
     this.event = event;
     this.dispatcherId = dispatcherId;
   }
 
-  toJSON() {
+  toJSON(): IMessagePortEvent {
     return {
+      /* eslint no-use-before-define:0 */
       event: MessagePortDispatcher.toJSON(this.event),
-      dispatcherId: this.dispatcherId
+      dispatcherId: this.dispatcherId,
     };
   }
 
-  static parse(object) {
-    var result = MessagePortDispatcher.parse(object);
+  static parse(object: mixed): string {
+    /* eslint no-use-before-define:0 */
+    let result = MessagePortDispatcher.parse(object);
     if (MessagePortEvent.isEvent(result)) {
+      /* eslint no-use-before-define:0 */
       result.event = MessagePortDispatcher.parse(result.event);
     } else {
       result = null;
@@ -29,44 +40,71 @@ class MessagePortEvent {
   }
 
   static isEvent(object) {
-    return EventDispatcher.isObject(object) && object.hasOwnProperty('dispatcherId') && object.hasOwnProperty('event');
+    return EventDispatcher.isObject(object) &&
+      Object.prototype.hasOwnProperty.call(object, 'dispatcherId') &&
+      Object.prototype.hasOwnProperty.call(object, 'event');
   }
 }
 
-const factory = (getTarget, dispatcher = null) => () => {
-  if (!dispatcher) {
-    dispatcher = MessagePortDispatcher.create(getTarget());
-  }
-  return dispatcher;
+type StaticGlobalDispatcher = ()=> MessagePortDispatcher;
+type MPDispatcherInternals = {
+  customPostMessageHandler?: PostMessage,
+  senderEventPreprocessor?: EventProcessor
 };
 
-const HANDLERS_FIELD = SymbolImpl('message.port.dispatcher::handlers');
-
 export class MessagePortDispatcher extends EventDispatcher {
+  _handlers: MPDispatcherInternals;
+  sender: EventDispatcher;
+  receiver: EventDispatcher;
+  dispatcherId: string;
+  targetOrigin: string;
+  addEventListener: (type: string, handler: EventListener) => void;
+  hasEventListener: (eventType: string) => boolean;
+  removeEventListener: (eventType: string) => void;
+  removeAllEventListeners: (eventType: string) => void;
 
   /**
    *
    * @param target {Window|Worker|MessagePort}
-   * @param customPostMessageHandler {?Function} Function that receive message object and pass it to MessagePort.postMessage()
-   * @param receiverEventPreprocessor {?Function} Function that pre-process all events received from MessagePort, before passing to listeners
-   * @param senderEventPreprocessor Function that pre-process all events sent to MessagePort
+   * @param customPostMessageHandler {?Function} Function that receive message object
+   *        and pass it to MessagePort.postMessage()
+   * @param receiverEventPreprocessor {?Function} Function that pre-process
+   *        all events received from MessagePort, before passing to listeners
+   * @param senderEventPreprocessor Function that pre-process all events sent
+   *        to MessagePort
    * @constructor
    */
-  constructor(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor, noInit = false) {
+  constructor(
+    target: MessagePortTarget,
+    customPostMessageHandler?: PostMessage = null,
+    receiverEventPreprocessor?: EventProcessor = null,
+    senderEventPreprocessor: EventProcessor = null,
+    noInit = false,
+  ) {
     super(null, true);
     if (!noInit) {
-      this.initiallize(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor);
+      this.initiallize(
+        target,
+        customPostMessageHandler,
+        receiverEventPreprocessor,
+        senderEventPreprocessor,
+      );
     }
   }
 
   /**
    * @private
    */
-  initiallize(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
+  initiallize(
+    target,
+    customPostMessageHandler,
+    receiverEventPreprocessor,
+    senderEventPreprocessor,
+  ) {
     this.target = target || self;
-    this[HANDLERS_FIELD] = {
-      customPostMessageHandler: customPostMessageHandler,
-      senderEventPreprocessor: senderEventPreprocessor
+    this._handlers = {
+      customPostMessageHandler,
+      senderEventPreprocessor,
     };
     this.sender = EventDispatcher.create();
     this.receiver = EventDispatcher.create(receiverEventPreprocessor);
@@ -80,27 +118,30 @@ export class MessagePortDispatcher extends EventDispatcher {
     target.addEventListener('message', this._messageEventListener.bind(this));
   }
 
-  dispatchEvent(event, data, transferList) {
-    event = EventDispatcher.getEvent(event, data);
-    if (this[HANDLERS_FIELD].senderEventPreprocessor) {
-      event = this[HANDLERS_FIELD].senderEventPreprocessor.call(this, event);
+  dispatchEvent(eventType, data, transferList) {
+    let event = EventDispatcher.getEvent(eventType, data);
+    if (this._handlers.senderEventPreprocessor) {
+      event = this._handlers.senderEventPreprocessor.call(this, event);
     }
-    var eventJson = MessagePortDispatcher.toJSON(new MessagePortEvent(event, this.dispatcherId));
+    const eventJson = MessagePortDispatcher.toJSON(
+      new MessagePortEvent(event, this.dispatcherId),
+    );
     this._postMessageHandler(eventJson, transferList);
   }
 
   _postMessageHandler(data, transferList) {
-    const handler = this[HANDLERS_FIELD].customPostMessageHandler;
+    const handler = this._handlers.customPostMessageHandler;
     if (handler) {
-      handler.call(this, data, transferList);
+      handler.call(this, data, this.targetOrigin, transferList);
     } else {
       this.target.postMessage(data, this.targetOrigin, transferList);
     }
   }
 
   _messageEventListener(event) {
+    // fixme .nativeEvent react-native thing, need a way to find out keep it or exclude
     event = event.nativeEvent || event;
-    var message = MessagePortEvent.parse(event.data);
+    const message = MessagePortEvent.parse(event.data);
     if (message) {
       if (message.dispatcherId === this.dispatcherId) {
         this.sender.dispatchEvent(message.event);
@@ -120,7 +161,7 @@ export class MessagePortDispatcher extends EventDispatcher {
    */
   static toJSON(object) {
     let objectJson;
-    if (typeof(object.toJSON) === 'function') {
+    if (typeof (object.toJSON) === 'function') {
       objectJson = object.toJSON();
     } else {
       objectJson = JSON.stringify(object);
@@ -147,24 +188,38 @@ export class MessagePortDispatcher extends EventDispatcher {
     return object;
   }
 
-  /**
-   * @returns {MessagePortDispatcher}
-   */
-  static self = factory(() => self);
-
-  /**
-   * @returns {MessagePortDispatcher}
-   */
-  static parent = factory(() => parent);
-
-  /**
-   * @returns {MessagePortDispatcher}
-   */
-  static top = factory(() => top);
-
-  static create(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
-    return new MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor);
+  static create(
+    target,
+    customPostMessageHandler,
+    receiverEventPreprocessor,
+    senderEventPreprocessor,
+  ) {
+    return new MessagePortDispatcher(
+      target,
+      customPostMessageHandler,
+      receiverEventPreprocessor,
+      senderEventPreprocessor,
+    );
   }
+
+  static self: StaticGlobalDispatcher;
+  static parent: StaticGlobalDispatcher;
+  static top: StaticGlobalDispatcher;
 }
+
+const factory = (
+  getTarget: () => MessagePortTarget,
+  dispatcher: MessagePortDispatcher = null,
+): StaticGlobalDispatcher => (): MessagePortDispatcher => {
+  if (!dispatcher) {
+    dispatcher = MessagePortDispatcher.create(getTarget());
+  }
+  return dispatcher;
+};
+
+MessagePortDispatcher.self = factory(() => self);
+MessagePortDispatcher.parent = factory(() => parent);
+MessagePortDispatcher.top = factory(() => top);
+MessagePortDispatcher.MessagePortEvent = MessagePortEvent;
 
 export default MessagePortDispatcher;

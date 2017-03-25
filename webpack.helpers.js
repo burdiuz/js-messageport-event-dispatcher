@@ -1,7 +1,7 @@
 const path = require('path');
 
-const LIBRARY_FILE_NAME = 'MessagePortDispatcher';
-const LIBRARY_VAR_NAME = 'messageport-dispatcher';
+const LIBRARY_FILE_NAME = 'messageport-dispatcher';
+const LIBRARY_VAR_NAME = 'MessagePortDispatcher';
 
 const p = (value) => {
   return path.resolve(__dirname, value);
