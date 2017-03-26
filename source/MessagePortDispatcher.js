@@ -1,5 +1,6 @@
 /**
  * Created by Oleg Galaburda on 09.02.16.
+ * @flow
  */
 
 import EventDispatcher from 'event-dispatcher';
