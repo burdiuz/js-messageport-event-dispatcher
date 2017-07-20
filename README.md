@@ -52,13 +52,13 @@ var target = {
 		console.log('Message sent', data);
 		window.postMessage(data, origin);
 	},
-	addEventLsitener: function(eventType, handler) {
+	addEventListener: function(eventType, handler) {
 		console.log('Event listener added to ', eventType);
 		window.addEventListener(eventType, handler);
 	},
-	removeEventLsitener: function(eventType, handler) {
+	removeEventListener: function(eventType, handler) {
 		console.log('Event listener removed from ', eventType);
-		window.removeEventLsitener(eventType, handler);
+		window.removeEventListener(eventType, handler);
 	}
 };
 var dispatcher = new MessagePortDispatcher(target);
