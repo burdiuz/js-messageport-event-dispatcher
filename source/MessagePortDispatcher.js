@@ -124,9 +124,7 @@ export class MessagePortDispatcher extends EventDispatcher {
     if (this._handlers.senderEventPreprocessor) {
       event = this._handlers.senderEventPreprocessor.call(this, event);
     }
-    const eventJson = MessagePortDispatcher.toJSON(
-      new MessagePortEvent(event, this.dispatcherId),
-    );
+    const eventJson = MessagePortDispatcher.toJSON(new MessagePortEvent(event, this.dispatcherId));
     this._postMessageHandler(eventJson, transferList);
   }
 

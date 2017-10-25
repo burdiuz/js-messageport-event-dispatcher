@@ -384,11 +384,6 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
       /******/ // expose the module cache
       /******/__webpack_require__.c = installedModules;
       /******/
-      /******/ // identity function for calling harmony imports with the correct context
-      /******/__webpack_require__.i = function (value) {
-        return value;
-      };
-      /******/
       /******/ // define getter function for harmony exports
       /******/__webpack_require__.d = function (exports, name, getter) {
         /******/if (!__webpack_require__.o(exports, name)) {
@@ -425,12 +420,35 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
       /******/__webpack_require__.p = "http://localhost:8081/dist/";
       /******/
       /******/ // Load entry module and return exports
-      /******/return __webpack_require__(__webpack_require__.s = 1);
+      /******/return __webpack_require__(__webpack_require__.s = 0);
       /******/
     }(
     /************************************************************************/
     /******/[
     /* 0 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.Event = undefined;
+
+      var _EventDispatcher = __webpack_require__(1);
+
+      var _EventDispatcher2 = _interopRequireDefault(_EventDispatcher);
+
+      function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : { default: obj };
+      }
+
+      exports.default = _EventDispatcher2.default;
+      exports.Event = _EventDispatcher.Event;
+
+      /***/
+    },
+    /* 1 */
     /***/function (module, exports, __webpack_require__) {
 
       "use strict";
@@ -520,6 +538,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
           value: function run(event, target) {
             var listener = void 0;
             var listeners = this.listeners;
+
             this.augmentEvent(event);
             // TODO this has to be handled in separate object ListenersRunner that should be
             // created for each call() call and asked for index validation on each listener remove.
@@ -678,7 +697,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
         }, {
           key: 'call',
           value: function call(event, target) {
-            var priorities = this.getPrioritiesByKey(event.type, this._listeners);
+            var priorities = this.getPrioritiesByKey(event.type);
             var stopped = false;
             var stopPropagation = function stopPropagation() {
               stopped = true;
@@ -689,6 +708,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                 return a - b;
               });
               var length = list.length;
+
               for (var index = 0; index < length; index++) {
                 if (stopped) break;
                 var _handlers = priorities[list[index]];
@@ -791,29 +811,6 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
       exports.default = EventDispatcher;
 
       /***/
-    },
-    /* 1 */
-    /***/function (module, exports, __webpack_require__) {
-
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.Event = undefined;
-
-      var _EventDispatcher = __webpack_require__(0);
-
-      var _EventDispatcher2 = _interopRequireDefault(_EventDispatcher);
-
-      function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : { default: obj };
-      }
-
-      exports.default = _EventDispatcher2.default;
-      exports.Event = _EventDispatcher.Event;
-
-      /***/
     }]
     /******/)
   );
@@ -823,23 +820,26 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
+"use strict";
+
+
+module.exports = function (module) {
+	if (!module.webpackPolyfill) {
+		module.deprecate = function () {};
 		module.paths = [];
 		// module.parent = undefined by default
-		if(!module.children) module.children = [];
+		if (!module.children) module.children = [];
 		Object.defineProperty(module, "loaded", {
 			enumerable: true,
-			get: function() {
+			get: function get() {
 				return module.l;
 			}
 		});
 		Object.defineProperty(module, "id", {
 			enumerable: true,
-			get: function() {
+			get: function get() {
 				return module.i;
 			}
 		});
@@ -847,7 +847,6 @@ module.exports = function(module) {
 	}
 	return module;
 };
-
 
 /***/ })
 /******/ ]);
