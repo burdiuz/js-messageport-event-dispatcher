@@ -15,6 +15,9 @@ import type {
 } from './TypeDefinition';
 
 export class MessagePortEvent implements IMessagePortEvent {
+  event: EventObject;
+  dispatcherId: string;
+
   constructor(event: EventObject, dispatcherId: string) {
     this.event = event;
     this.dispatcherId = dispatcherId;
@@ -47,7 +50,7 @@ export class MessagePortEvent implements IMessagePortEvent {
   }
 }
 
-type StaticGlobalDispatcher = ()=> MessagePortDispatcher;
+type StaticGlobalDispatcher = () => MessagePortDispatcher;
 type MPDispatcherInternals = {
   customPostMessageHandler?: PostMessage,
   senderEventPreprocessor?: EventProcessor
@@ -84,7 +87,7 @@ export class MessagePortDispatcher extends EventDispatcher {
   ) {
     super(null, true);
     if (!noInit) {
-      this.initiallize(
+      this.initialize(
         target,
         customPostMessageHandler,
         receiverEventPreprocessor,
@@ -96,7 +99,7 @@ export class MessagePortDispatcher extends EventDispatcher {
   /**
    * @private
    */
-  initiallize(
+  initialize(
     target,
     customPostMessageHandler,
     receiverEventPreprocessor,

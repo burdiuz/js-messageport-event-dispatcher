@@ -192,7 +192,7 @@ var MessagePortDispatcher = exports.MessagePortDispatcher = function (_EventDisp
     var _this = _possibleConstructorReturn(this, (MessagePortDispatcher.__proto__ || Object.getPrototypeOf(MessagePortDispatcher)).call(this, null, true));
 
     if (!noInit) {
-      _this.initiallize(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor);
+      _this.initialize(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor);
     }
     return _this;
   }
@@ -203,8 +203,8 @@ var MessagePortDispatcher = exports.MessagePortDispatcher = function (_EventDisp
 
 
   _createClass(MessagePortDispatcher, [{
-    key: 'initiallize',
-    value: function initiallize(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
+    key: 'initialize',
+    value: function initialize(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
       this.target = target || self;
       this._handlers = {
         customPostMessageHandler: customPostMessageHandler,
