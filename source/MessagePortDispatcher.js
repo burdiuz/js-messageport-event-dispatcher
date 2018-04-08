@@ -3,7 +3,7 @@
  * @flow
  */
 
-import EventDispatcher from 'event-dispatcher';
+import EventDispatcher from '@actualwave/event-dispatcher';
 
 import type {
   EventObject,

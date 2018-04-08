@@ -2,7 +2,7 @@
  * Created by Oleg Galaburda on 15.02.16.
  */
 
-import EventDispatcher from 'event-dispatcher';
+import EventDispatcher from '@actualwave/event-dispatcher';
 import MessagePortDispatcher from './index';
 
 describe('MessagePortDispatcher', () => {

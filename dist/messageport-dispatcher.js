@@ -487,11 +487,13 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
           */
 
       var Event = exports.Event = function () {
-        function Event(type, data) {
+        function Event(type) {
+          var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
           _classCallCheck(this, Event);
 
           this.type = type;
-          this.data = data || null;
+          this.data = data;
           this.defaultPrevented = false;
         }
 
@@ -728,7 +730,8 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
       }();
 
       var EventDispatcher = function () {
-        function EventDispatcher(eventPreprocessor) {
+        function EventDispatcher() {
+          var eventPreprocessor = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
           var noInit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
           _classCallCheck(this, EventDispatcher);
@@ -744,7 +747,9 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
 
         _createClass(EventDispatcher, [{
           key: 'initialize',
-          value: function initialize(eventPreprocessor) {
+          value: function initialize() {
+            var eventPreprocessor = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
             this._eventPreprocessor = eventPreprocessor;
             this._listeners = new EventListeners();
           }

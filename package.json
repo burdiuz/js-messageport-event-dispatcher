@@ -1,7 +1,7 @@
 {
-  "name": "messageport-dispatcher",
+  "name": "@actualwave/messageport-dispatcher",
   "description": "Cross-domain EventDispatcher for MessagePort interface",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "dist/messageport-dispatcher.js",
   "keywords": [
     "events",
@@ -13,7 +13,10 @@
     "fire",
     "handle",
     "listener",
-    "dispatcher"
+    "dispatcher",
+    "addEventListener",
+    "removeEventListener",
+    "dispatchEvent"
   ],
   "homepage": "https://github.com/burdiuz/js-lib-environment",
   "bugs": {
@@ -41,7 +44,7 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.4.0",
-    "event-dispatcher": "git+https://github.com/burdiuz/js-event-dispatcher.git",
+    "@actualwave/event-dispatcher": "^1.1.13",
     "flow-bin": "^0.57.3",
     "karma": "^1.7.1",
     "karma-coverage": "^1.1.1",
