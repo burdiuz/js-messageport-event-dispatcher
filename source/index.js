@@ -1,6 +1,6 @@
-import MessagePortDispatcher, { MessagePortEvent } from './MessagePortDispatcher';
+import { MessagePortDispatcher, MessagePortEvent } from './MessagePortDispatcher';
 
 const { self, create } = MessagePortDispatcher;
 
 export default MessagePortDispatcher;
-export { MessagePortEvent, self, create };
+export { MessagePortDispatcher, MessagePortEvent, self, create };

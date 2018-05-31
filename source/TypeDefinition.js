@@ -14,7 +14,7 @@ export type EventType = string | EventObject;
 export type EventListener = (event?: EventObject) => void;
 
 export interface IMessagePortEvent {
-  event:EventObject;
+  event: EventObject;
   dispatcherId: string;
 }
 

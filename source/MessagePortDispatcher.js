@@ -2,7 +2,7 @@
  * Created by Oleg Galaburda on 09.02.16.
  * @flow
  */
-
+import hasOwn from '@actualwave/has-own';
 import EventDispatcher from '@actualwave/event-dispatcher';
 
 import type {
@@ -43,17 +43,17 @@ export class MessagePortEvent implements IMessagePortEvent {
     return result;
   }
 
-  static isEvent(object) {
-    return EventDispatcher.isObject(object) &&
-      Object.prototype.hasOwnProperty.call(object, 'dispatcherId') &&
-      Object.prototype.hasOwnProperty.call(object, 'event');
+  static isEvent(object: any) {
+    return (
+      EventDispatcher.isObject(object) && hasOwn(object, 'dispatcherId') && hasOwn(object, 'event')
+    );
   }
 }
 
 type StaticGlobalDispatcher = () => MessagePortDispatcher;
 type MPDispatcherInternals = {
   customPostMessageHandler?: PostMessage,
-  senderEventPreprocessor?: EventProcessor
+  senderEventPreprocessor?: EventProcessor,
 };
 
 export class MessagePortDispatcher extends EventDispatcher {
@@ -80,10 +80,10 @@ export class MessagePortDispatcher extends EventDispatcher {
    */
   constructor(
     target: MessagePortTarget,
-    customPostMessageHandler?: PostMessage = null,
-    receiverEventPreprocessor?: EventProcessor = null,
-    senderEventPreprocessor: EventProcessor = null,
-    noInit = false,
+    customPostMessageHandler: ?PostMessage = null,
+    receiverEventPreprocessor: ?EventProcessor = null,
+    senderEventPreprocessor: ?EventProcessor = null,
+    noInit: boolean = false,
   ) {
     super(null, true);
     if (!noInit) {
@@ -99,12 +99,8 @@ export class MessagePortDispatcher extends EventDispatcher {
   /**
    * @private
    */
-  initialize(
-    target,
-    customPostMessageHandler,
-    receiverEventPreprocessor,
-    senderEventPreprocessor,
-  ) {
+  initialize(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) {
+    // eslint-disable-next-line no-restricted-globals
     this.target = target || self;
     this._handlers = {
       customPostMessageHandler,
@@ -163,7 +159,7 @@ export class MessagePortDispatcher extends EventDispatcher {
    */
   static toJSON(object) {
     let objectJson;
-    if (typeof (object.toJSON) === 'function') {
+    if (typeof object.toJSON === 'function') {
       objectJson = object.toJSON();
     } else {
       objectJson = JSON.stringify(object);
@@ -211,7 +207,7 @@ export class MessagePortDispatcher extends EventDispatcher {
 
 const factory = (
   getTarget: () => MessagePortTarget,
-  dispatcher: MessagePortDispatcher = null,
+  dispatcher: ?MessagePortDispatcher = null,
 ): StaticGlobalDispatcher => (): MessagePortDispatcher => {
   if (!dispatcher) {
     dispatcher = MessagePortDispatcher.create(getTarget());
@@ -219,9 +215,13 @@ const factory = (
   return dispatcher;
 };
 
+// eslint-disable-next-line no-restricted-globals
 MessagePortDispatcher.self = factory(() => self);
+// eslint-disable-next-line no-restricted-globals
 MessagePortDispatcher.parent = factory(() => parent);
+// eslint-disable-next-line no-restricted-globals
 MessagePortDispatcher.top = factory(() => top);
+
 MessagePortDispatcher.MessagePortEvent = MessagePortEvent;
 
 export default MessagePortDispatcher;

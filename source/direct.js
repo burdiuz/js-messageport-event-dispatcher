@@ -1,3 +1,3 @@
-import lib from './index';
+const MessagePortDispatcher = require('./MessagePortDispatcher');
 
-module.exports = lib;
+module.exports = MessagePortDispatcher.default || MessagePortDispatcher;
