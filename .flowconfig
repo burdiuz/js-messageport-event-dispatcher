@@ -1,8 +1,9 @@
 [ignore]
 
 [include]
-source/**/*.js
+./source/**/*.js
 
 [libs]
+node_modules/@actualwave/event-dispatcher/dist/event-dispatcher.js.flow
 
 [options]

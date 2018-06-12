@@ -78,7 +78,7 @@
   },
   "prettier": {
     "singleQuote": true,
-    "trailingComma": "es5",
+    "trailingComma": "all",
     "arrowParens": "always",
     "parser": "flow"
   },

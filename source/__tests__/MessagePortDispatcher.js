@@ -3,13 +3,23 @@
  */
 /* eslint-disable no-restricted-globals */
 import EventDispatcher from '@actualwave/event-dispatcher';
-import { MessagePortDispatcher } from '../index';
+import {
+  MessagePortDispatcher,
+  create,
+  createForSelf,
+  createForParent,
+  createForTop,
+} from '../MessagePortDispatcher';
 
 describe('MessagePortDispatcher', () => {
   let messagePort;
   let dispatcher;
 
   beforeEach(() => {
+    global.self = global.self || { type: 'SELF' };
+    global.parent = global.parent || { type: 'PARENT' };
+    global.top = global.top || { type: 'TOP' };
+
     messagePort = new EventDispatcher();
     jest.spyOn(messagePort, 'addEventListener');
     jest.spyOn(messagePort, 'hasEventListener');
@@ -38,16 +48,16 @@ describe('MessagePortDispatcher', () => {
     });
   });
 
-  it('self() should create MessagePortDispatcher for current window', () => {
-    expect(MessagePortDispatcher.self().target).toBe(self);
+  it('createForSelf() should create MessagePortDispatcher for current window', () => {
+    expect(createForSelf().target).toBe(self);
   });
 
-  it('parent() should create MessagePortDispatcher for parent window', () => {
-    expect(MessagePortDispatcher.parent().target).toBe(parent);
+  it('createForParent() should create MessagePortDispatcher for parent window', () => {
+    expect(createForParent().target).toBe(parent);
   });
 
-  it('top() should create MessagePortDispatcher for top window', () => {
-    expect(MessagePortDispatcher.top().target).toBe(top);
+  it('createForTop() should create MessagePortDispatcher for top window', () => {
+    expect(createForTop().target).toBe(top);
   });
 
   describe('When using pre-processors', () => {
@@ -72,7 +82,9 @@ describe('MessagePortDispatcher', () => {
 
       it('should call preprocessor for sent event', () => {
         expect(sendPreprocessor).toHaveBeenCalledTimes(1);
-        expect(sendPreprocessor).toHaveBeenCalledWith(expect.objectContaining({ type: 'sentEvent' }));
+        expect(sendPreprocessor).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'sentEvent' }),
+        );
       });
     });
 
@@ -89,59 +101,9 @@ describe('MessagePortDispatcher', () => {
 
       it('should call preprocessor for received event', () => {
         expect(recieverPreprocessor).toHaveBeenCalledTimes(1);
-        expect(recieverPreprocessor).toHaveBeenCalledWith(expect.objectContaining({ type: 'receivedEvent' }));
-      });
-    });
-  });
-
-  describe('toJSON()', () => {
-    describe('When toJSON is defined', () => {
-      let object;
-      let result;
-
-      beforeEach(() => {
-        object = {
-          toJSON: jest.fn(() => ({})),
-        };
-        result = MessagePortDispatcher.toJSON(object);
-      });
-
-      it('should use object toJSON() method', () => {
-        expect(object.toJSON).toHaveBeenCalledTimes(1);
-      });
-
-      it('should return object', () => {
-        expect(typeof result).toBe('object');
-      });
-    });
-
-    describe("When toJSON isn't defined", () => {
-      let object;
-      let result;
-
-      beforeEach(() => {
-        object = { value: true, target: {}, type: 'anystring' };
-        result = MessagePortDispatcher.toJSON(object);
-      });
-
-      it('should return string', () => {
-        expect(typeof result).toBe('string');
-      });
-
-      it('should return proper JSON', () => {
-        expect(JSON.parse(result)).toEqual(object);
-      });
-    });
-  });
-
-  describe('parse()', () => {
-    it('should accept object as parameter', () => {
-      expect(MessagePortDispatcher.parse({ something: '123' })).toEqual({ something: '123' });
-    });
-
-    it('should accept string as parameter', () => {
-      expect(MessagePortDispatcher.parse(JSON.stringify({ something: '123' }))).toEqual({
-        something: '123',
+        expect(recieverPreprocessor).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'receivedEvent' }),
+        );
       });
     });
   });
@@ -155,7 +117,7 @@ describe('MessagePortDispatcher', () => {
       customHandler = jest.fn();
       sendPreprocessor = jest.fn((event) => event);
       recieverPreprocessor = jest.fn((event) => event);
-      dispatcher = MessagePortDispatcher.create(
+      dispatcher = create(
         messagePort,
         customHandler,
         recieverPreprocessor,
@@ -178,19 +140,25 @@ describe('MessagePortDispatcher', () => {
 
     it('should save custom handler', () => {
       expect(customHandler).toHaveBeenCalledTimes(1);
-      expect(customHandler.mock.calls[0][0]).toEqual(expect.objectContaining({
-        event: expect.objectContaining({ type: 'sentEvent' }),
-      }));
+      expect(customHandler.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          event: expect.objectContaining({ type: 'sentEvent' }),
+        }),
+      );
     });
 
     it('should call preprocessor for sent event', () => {
       expect(sendPreprocessor).toHaveBeenCalledTimes(1);
-      expect(sendPreprocessor.mock.calls[0][0]).toEqual(expect.objectContaining({ type: 'sentEvent' }));
+      expect(sendPreprocessor.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ type: 'sentEvent' }),
+      );
     });
 
     it('should call preprocessor for received event', () => {
       expect(recieverPreprocessor).toHaveBeenCalledTimes(1);
-      expect(recieverPreprocessor.mock.calls[0][0]).toEqual(expect.objectContaining({ type: 'receivedEvent' }));
+      expect(recieverPreprocessor.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ type: 'receivedEvent' }),
+      );
     });
   });
 
@@ -243,7 +211,9 @@ describe('MessagePortDispatcher', () => {
       });
 
       it('should pass targetOrigin', () => {
-        expect(messagePort.postMessage.mock.calls[0][1]).toBe(dispatcher.targetOrigin);
+        expect(messagePort.postMessage.mock.calls[0][1]).toBe(
+          dispatcher.targetOrigin,
+        );
       });
 
       describe('When mirroring sent message', () => {
@@ -302,10 +272,12 @@ describe('MessagePortDispatcher', () => {
       });
 
       it('should pass event object to listener', () => {
-        expect(listener).toHaveBeenCalledWith(expect.objectContaining({
-          type: 'myEvent',
-          data: 'anything',
-        }));
+        expect(listener).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'myEvent',
+            data: 'anything',
+          }),
+        );
       });
     });
   });
