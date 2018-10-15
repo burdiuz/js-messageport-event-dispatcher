@@ -1,6 +1,20 @@
-import MessagePortDispatcher, { MessagePortEvent } from './MessagePortDispatcher';
-
-const { self, create } = MessagePortDispatcher;
+import {
+  MessagePortDispatcher,
+  factory,
+  getForSelf,
+  getForParent,
+  getForTop,
+  createMessagePortDispatcher,
+} from './MessagePortDispatcher';
+import { MessagePortEvent } from './MessagePortEvent';
 
 export default MessagePortDispatcher;
-export { MessagePortEvent, self, create };
+export {
+  MessagePortDispatcher,
+  MessagePortEvent,
+  factory,
+  getForSelf,
+  getForParent,
+  getForTop,
+  createMessagePortDispatcher,
+};
