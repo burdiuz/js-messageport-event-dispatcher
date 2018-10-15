@@ -5,7 +5,7 @@
 import EventDispatcher from '@actualwave/event-dispatcher';
 import {
   MessagePortDispatcher,
-  create,
+  createMessagePortDispatcher,
   createForSelf,
   createForParent,
   createForTop,
@@ -108,7 +108,7 @@ describe('MessagePortDispatcher', () => {
     });
   });
 
-  describe('create()', () => {
+  describe('createEventDispatcher()', () => {
     let customHandler;
     let sendPreprocessor;
     let recieverPreprocessor;
@@ -117,7 +117,7 @@ describe('MessagePortDispatcher', () => {
       customHandler = jest.fn();
       sendPreprocessor = jest.fn((event) => event);
       recieverPreprocessor = jest.fn((event) => event);
-      dispatcher = create(
+      dispatcher = createMessagePortDispatcher(
         messagePort,
         customHandler,
         recieverPreprocessor,
@@ -211,9 +211,7 @@ describe('MessagePortDispatcher', () => {
       });
 
       it('should pass targetOrigin', () => {
-        expect(messagePort.postMessage.mock.calls[0][1]).toBe(
-          dispatcher.targetOrigin,
-        );
+        expect(messagePort.postMessage.mock.calls[0][1]).toBe(dispatcher.targetOrigin);
       });
 
       describe('When mirroring sent message', () => {

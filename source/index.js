@@ -1,10 +1,10 @@
 import {
   MessagePortDispatcher,
-  create,
   factory,
   createForSelf,
   createForParent,
   createForTop,
+  createMessagePortDispatcher,
 } from './MessagePortDispatcher';
 import { MessagePortEvent } from './MessagePortEvent';
 
@@ -12,9 +12,9 @@ export default MessagePortDispatcher;
 export {
   MessagePortDispatcher,
   MessagePortEvent,
-  create,
   factory,
   createForSelf,
   createForParent,
   createForTop,
+  createMessagePortDispatcher,
 };

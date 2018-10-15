@@ -1,10 +1,9 @@
 /**
  * Created by Oleg Galaburda on 09.02.16.
  */
-import EventDispatcher from '@actualwave/event-dispatcher';
+import { isObject } from '@actualwave/event-dispatcher';
 
-export const createId = () =>
-  `MP/${Math.ceil(Math.random() * 10000)}/${Date.now()}`;
+export const createId = () => `MP/${Math.ceil(Math.random() * 10000)}/${Date.now()}`;
 
 /**
  * If toJSON method implemented on object, it will be called instead of converting to JSON string.
@@ -30,7 +29,7 @@ export const toRawData = (object) => {
 export const parseRawData = (data) => {
   let object; // keep it undefined in case of error
 
-  if (EventDispatcher.isObject(data)) {
+  if (isObject(data)) {
     return data;
   }
 

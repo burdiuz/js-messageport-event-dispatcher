@@ -1,84 +1,30 @@
 /**
  * Created by Oleg Galaburda on 09.02.16.
  */
-import EventDispatcher from '@actualwave/event-dispatcher';
+/* eslint-disable no-restricted-globals */
+
+import { createEventDispatcher, getEvent } from '@actualwave/event-dispatcher';
 import { MessagePortEvent, parseMessagePortEvent } from './MessagePortEvent';
 import { createId, toRawData } from './utils';
 
-export const create = (
-  target,
-  customPostMessageHandler,
-  receiverEventPreprocessor,
-  senderEventPreprocessor,
-) =>
-  new MessagePortDispatcher(
-    target,
-    customPostMessageHandler,
-    receiverEventPreprocessor,
-    senderEventPreprocessor,
-  );
+export class MessagePortDispatcher {
+  dispatcherId = createId();
 
-export const factory = (getTarget, dispatcher = null) => () => {
-  if (!dispatcher) {
-    return create(getTarget());
-  }
-  return dispatcher;
-};
-
-// eslint-disable-next-line no-restricted-globals
-export const createForSelf = factory(() => self);
-
-// eslint-disable-next-line no-restricted-globals
-export const createForParent = factory(() => parent);
-
-// eslint-disable-next-line no-restricted-globals
-export const createForTop = factory(() => top);
-
-export class MessagePortDispatcher extends EventDispatcher {
-  customPostMessageHandler;
-  senderEventPreprocessor;
-  sender;
-  receiver;
-  dispatcherId;
-  targetOrigin;
+  targetOrigin = '*';
 
   constructor(
-    target,
-    customPostMessageHandler = null,
-    receiverEventPreprocessor = null,
-    senderEventPreprocessor = null,
-    noInit = false,
-  ) {
-    super(null, true);
-    if (!noInit) {
-      this.initialize(
-        target,
-        customPostMessageHandler,
-        receiverEventPreprocessor,
-        senderEventPreprocessor,
-      );
-    }
-  }
-
-  /**
-   * @private
-   */
-  initialize(
-    target,
+    target = null,
     customPostMessageHandler = null,
     receiverEventPreprocessor = null,
     senderEventPreprocessor = null,
   ) {
-    // eslint-disable-next-line no-restricted-globals
     this.target = target || self;
     this.customPostMessageHandler = customPostMessageHandler;
     this.senderEventPreprocessor = senderEventPreprocessor;
-    this.sender = EventDispatcher.create();
-    this.receiver = EventDispatcher.create(receiverEventPreprocessor);
-    this.dispatcherId = createId();
-    this.targetOrigin = '*';
+    this.sender = createEventDispatcher();
+    this.receiver = createEventDispatcher(receiverEventPreprocessor);
 
-    target.addEventListener('message', this._messageEventListener);
+    target.addEventListener('message', (event) => this._postMessageListener(event));
   }
 
   addEventListener(eventType, listener, priority) {
@@ -98,25 +44,35 @@ export class MessagePortDispatcher extends EventDispatcher {
   }
 
   dispatchEvent(eventType, data, transferList) {
-    let event = EventDispatcher.getEvent(eventType, data);
+    let event = getEvent(eventType, data);
+
     if (this.senderEventPreprocessor) {
       event = this.senderEventPreprocessor.call(this, event);
     }
+
     const eventJson = toRawData(new MessagePortEvent(event, this.dispatcherId));
-    this._postMessageHandler(eventJson, transferList);
+
+    return this._postMessageHandler(eventJson, transferList);
   }
 
-  _postMessageHandler = (data, transferList) => {
+  /**
+   * @private
+   */
+  _postMessageHandler(data, transferList) {
     const handler = this.customPostMessageHandler;
-    if (handler) {
-      handler.call(this, data, this.targetOrigin, transferList);
-    } else {
-      this.target.postMessage(data, this.targetOrigin, transferList);
-    }
-  };
 
-  _messageEventListener = (event) => {
-    // fixme .nativeEvent react-native thing, need a way to find out keep it or exclude
+    if (handler) {
+      return handler.call(this, data, this.targetOrigin, transferList);
+    }
+
+    return this.target.postMessage(data, this.targetOrigin, transferList);
+  }
+
+  /**
+   * @private
+   */
+  _postMessageListener(event) {
+    // INFO .nativeEvent react-native thing, it contains event object coming from WebView
     event = event.nativeEvent || event;
     const message = parseMessagePortEvent(event.data);
 
@@ -127,20 +83,33 @@ export class MessagePortDispatcher extends EventDispatcher {
         this.receiver.dispatchEvent(message.event);
       }
     }
-  };
-
-  static create = create;
-
-  // eslint-disable-next-line no-restricted-globals
-  static self = createForSelf;
-
-  // eslint-disable-next-line no-restricted-globals
-  static parent = createForParent;
-
-  // eslint-disable-next-line no-restricted-globals
-  static top = createForTop;
+  }
 }
 
-MessagePortDispatcher.MessagePortEvent = MessagePortEvent;
+export const createMessagePortDispatcher = (
+  target,
+  customPostMessageHandler,
+  receiverEventPreprocessor,
+  senderEventPreprocessor,
+) =>
+  new MessagePortDispatcher(
+    target,
+    customPostMessageHandler,
+    receiverEventPreprocessor,
+    senderEventPreprocessor,
+  );
+
+export const factory = (getTarget, dispatcher = null) => () => {
+  if (!dispatcher) {
+    return createMessagePortDispatcher(getTarget());
+  }
+  return dispatcher;
+};
+
+export const createForSelf = factory(() => self);
+
+export const createForParent = factory(() => parent);
+
+export const createForTop = factory(() => top);
 
 export default MessagePortDispatcher;
