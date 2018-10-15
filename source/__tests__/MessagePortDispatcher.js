@@ -6,10 +6,10 @@ import EventDispatcher from '@actualwave/event-dispatcher';
 import {
   MessagePortDispatcher,
   createMessagePortDispatcher,
-  createForSelf,
-  createForParent,
-  createForTop,
-} from '../MessagePortDispatcher';
+  getForSelf,
+  getForParent,
+  getForTop,
+} from '../index';
 
 describe('MessagePortDispatcher', () => {
   let messagePort;
@@ -48,16 +48,25 @@ describe('MessagePortDispatcher', () => {
     });
   });
 
-  it('createForSelf() should create MessagePortDispatcher for current window', () => {
-    expect(createForSelf().target).toBe(self);
+  it('getForSelf() should create MessagePortDispatcher for current window', () => {
+    const selfDispatcher = getForSelf();
+
+    expect(selfDispatcher.target).toBe(self);
+    expect(getForSelf()).toBe(selfDispatcher);
   });
 
-  it('createForParent() should create MessagePortDispatcher for parent window', () => {
-    expect(createForParent().target).toBe(parent);
+  it('getForParent() should create MessagePortDispatcher for parent window', () => {
+    expect(getForParent().target).toBe(parent);
   });
 
-  it('createForTop() should create MessagePortDispatcher for top window', () => {
-    expect(createForTop().target).toBe(top);
+  it('getForTop() should create MessagePortDispatcher for top window', () => {
+    expect(getForTop().target).toBe(top);
+  });
+
+  describe('When created with no arguments', () => {
+    it('should use global self as target', () => {
+      expect(new MessagePortDispatcher().target).toBe(self);
+    });
   });
 
   describe('When using pre-processors', () => {
@@ -200,6 +209,10 @@ describe('MessagePortDispatcher', () => {
         dispatcher.dispatchEvent(event);
       });
 
+      it('should have listeners for "myEvent"', () => {
+        expect(dispatcher.hasEventListener('myEvent')).toBe(true);
+      });
+
       it('should call postMessage', () => {
         expect(messagePort.postMessage).toHaveBeenCalledTimes(1);
       });
@@ -257,6 +270,10 @@ describe('MessagePortDispatcher', () => {
         messagePort.dispatchEvent('message', pkg);
       });
 
+      it('should have listeners for "myEvent"', () => {
+        expect(dispatcher.hasEventListener('myEvent')).toBe(true);
+      });
+
       it('sender should skip message event', () => {
         expect(senderListener).not.toHaveBeenCalled();
       });
@@ -276,6 +293,44 @@ describe('MessagePortDispatcher', () => {
             data: 'anything',
           }),
         );
+      });
+
+      describe('When listener removed', () => {
+        beforeEach(() => {
+          listener.mockClear();
+          receiverListener.mockClear();
+          senderListener.mockClear();
+          dispatcher.removeEventListener('myEvent', listener);
+          messagePort.dispatchEvent('message', pkg);
+        });
+
+        it('sender should skip message event', () => {
+          expect(senderListener).not.toHaveBeenCalled();
+        });
+
+        it('receiver should dispatch event', () => {
+          expect(receiverListener).toHaveBeenCalledTimes(1);
+        });
+
+        it('should not call event listener', () => {
+          expect(listener).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('When all listeners removed', () => {
+        beforeEach(() => {
+          listener.mockClear();
+          receiverListener.mockClear();
+          senderListener.mockClear();
+          dispatcher.removeAllEventListeners('myEvent');
+          messagePort.dispatchEvent('message', pkg);
+        });
+
+        it('should not call any event listener', () => {
+          expect(listener).not.toHaveBeenCalled();
+          expect(senderListener).not.toHaveBeenCalled();
+          expect(receiverListener).not.toHaveBeenCalled();
+        });
       });
     });
   });

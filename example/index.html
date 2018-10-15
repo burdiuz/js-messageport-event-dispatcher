@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EventDispatcher Example</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-        integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+    crossorigin="anonymous">
   <style type="text/css">
     iframe {
       height: 600px;
     }
   </style>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-          integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
-          crossorigin="anonymous"></script>
-  <script type="text/javascript" src="../dist/messageport-dispatcher.direct.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+    crossorigin="anonymous"></script>
+  <script type="text/javascript" src="messageport-dispatcher.js"></script>
   <script type="text/javascript">
-    $(document).ready(function() {
+
+    const { createMessagePortDispatcher } = MessagePortDispatcher;
+
+    $(document).ready(function () {
 
       var leftInitialized = false;
       var rightInitialized = false;
@@ -28,27 +31,27 @@
         }
       }
 
-      var leftDispatcher = MessagePortDispatcher.create($('#left').get(0).contentWindow);
-      leftDispatcher.addEventListener('initialized', function() {
-        leftDispatcher.dispatchEvent('handshake', {name: 'Left'});
+      var leftDispatcher = createMessagePortDispatcher($('#left').get(0).contentWindow);
+      leftDispatcher.addEventListener('initialized', function () {
+        leftDispatcher.dispatchEvent('handshake', { name: 'Left' });
         leftInitialized = true;
         checkReadiness();
       });
-      leftDispatcher.addEventListener('sendData', function(event) {
+      leftDispatcher.addEventListener('sendData', function (event) {
         rightDispatcher.dispatchEvent('dataReceived', event.data);
       });
 
-      var rightDispatcher = MessagePortDispatcher.create($('#right').get(0).contentWindow);
-      rightDispatcher.addEventListener('initialized', function() {
-        rightDispatcher.dispatchEvent('handshake', {name: 'Right'});
+      var rightDispatcher = createMessagePortDispatcher($('#right').get(0).contentWindow);
+      rightDispatcher.addEventListener('initialized', function () {
+        rightDispatcher.dispatchEvent('handshake', { name: 'Right' });
         rightInitialized = true;
         checkReadiness();
       });
-      rightDispatcher.addEventListener('sendData', function(event) {
+      rightDispatcher.addEventListener('sendData', function (event) {
         leftDispatcher.dispatchEvent('dataReceived', event.data);
       });
 
-      $('.btn-primary').on('click', function() {
+      $('.btn-primary').on('click', function () {
         var event = {
           type: 'dataReceived',
           data: {
@@ -63,33 +66,35 @@
     });
   </script>
 </head>
+
 <body>
-<form>
-  <div class="container">
-    <div class="row">
-      <div class="col-xs-12">
-        <h4>MessagePortDispatcher Example</h4>
+  <form>
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          <h4>MessagePortDispatcher Example</h4>
+        </div>
+      </div>
+      <div id="messageForm" class="row hidden">
+        <div class="col-xs-2 form-group">
+          <label for="message">Message To Both:
+          </label>
+        </div>
+        <div class="col-xs-6 form-group">
+          <input type="text" class="form-control" id="message">
+        </div>
+        <div class="col-xs-4 form-group">
+          <input type="button" value="Send Event" class="btn btn-primary"></input>
+        </div>
+      </div>
+      <div class="row">
+        <iframe class="col-xs-6" id="left" src="frame.html">
+        </iframe>
+        <iframe class="col-xs-6" id="right" src="frame.html">
+        </iframe>
       </div>
     </div>
-    <div id="messageForm" class="row hidden">
-      <div class="col-xs-2 form-group">
-        <label for="message">Message To Both:
-        </label>
-      </div>
-      <div class="col-xs-6 form-group">
-        <input type="text" class="form-control" id="message">
-      </div>
-      <div class="col-xs-4 form-group">
-        <input type="button" value="Send Event" class="btn btn-primary"></input>
-      </div>
-    </div>
-    <div class="row">
-      <iframe class="col-xs-6" id="left" src="frame.html">
-      </iframe>
-      <iframe class="col-xs-6" id="right" src="frame.html">
-      </iframe>
-    </div>
-  </div>
-</form>
+  </form>
 </body>
+
 </html>

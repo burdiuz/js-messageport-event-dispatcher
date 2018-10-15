@@ -1,9 +1,9 @@
 import {
   MessagePortDispatcher,
   factory,
-  createForSelf,
-  createForParent,
-  createForTop,
+  getForSelf,
+  getForParent,
+  getForTop,
   createMessagePortDispatcher,
 } from './MessagePortDispatcher';
 import { MessagePortEvent } from './MessagePortEvent';
@@ -13,8 +13,8 @@ export {
   MessagePortDispatcher,
   MessagePortEvent,
   factory,
-  createForSelf,
-  createForParent,
-  createForTop,
+  getForSelf,
+  getForParent,
+  getForTop,
   createMessagePortDispatcher,
 };

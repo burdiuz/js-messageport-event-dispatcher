@@ -92,7 +92,7 @@ class MessagePortDispatcher {
     this.senderEventPreprocessor = senderEventPreprocessor;
     this.sender = eventDispatcher.createEventDispatcher();
     this.receiver = eventDispatcher.createEventDispatcher(receiverEventPreprocessor);
-    target.addEventListener('message', event => this._postMessageListener(event));
+    this.target.addEventListener('message', event => this._postMessageListener(event));
   }
 
   addEventListener(eventType, listener, priority) {
@@ -158,21 +158,21 @@ class MessagePortDispatcher {
 const createMessagePortDispatcher = (target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) => new MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor);
 const factory = (getTarget, dispatcher = null) => () => {
   if (!dispatcher) {
-    return createMessagePortDispatcher(getTarget());
+    dispatcher = createMessagePortDispatcher(getTarget());
   }
 
   return dispatcher;
 };
-const createForSelf = factory(() => self);
-const createForParent = factory(() => parent);
-const createForTop = factory(() => top);
+const getForSelf = factory(() => self);
+const getForParent = factory(() => parent);
+const getForTop = factory(() => top);
 
 exports.default = MessagePortDispatcher;
 exports.MessagePortDispatcher = MessagePortDispatcher;
 exports.MessagePortEvent = MessagePortEvent;
 exports.factory = factory;
-exports.createForSelf = createForSelf;
-exports.createForParent = createForParent;
-exports.createForTop = createForTop;
+exports.getForSelf = getForSelf;
+exports.getForParent = getForParent;
+exports.getForTop = getForTop;
 exports.createMessagePortDispatcher = createMessagePortDispatcher;
 //# sourceMappingURL=index.js.map

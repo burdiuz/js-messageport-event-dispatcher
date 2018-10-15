@@ -50,4 +50,10 @@ describe('parse()', () => {
       something: '123',
     });
   });
+
+  describe('When data is not a valid JSON', () => {
+    it('should result with undefined', () => {
+      expect(parseRawData('{ "something": "123')).toBeUndefined();
+    });
+  });
 });
