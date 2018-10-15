@@ -7,19 +7,19 @@ MessagePortDispatcher is extended API for cross-origin communication. It utilize
 
 
 ## Installation
-MessagePortDispatcher is available via [bower](http://bower.io/)
-```
-bower install messageport-dispatcher --save
-```
-If you want to use it with [npm](https://www.npmjs.com/) package manger, add it to `dependencies`section of your package.json file.
+Easy to install with [npm](https://www.npmjs.com/) package manager
 ```javascript
-"dependencies": {
-  "messageport-dispatcher": "git://github.com/burdiuz/js-messageport-event-dispatcher.git"
-}
+npm install --save @actualwave/messageport-dispatcher
+```
+with [yarn](https://yarnpkg.com/) package manager
+```javascript
+yarn add @actualwave/messageport-dispatcher
 ```
 
 ## Usage
-MessagePortDispatcher distribution package is wrapped into [UMD](https://github.com/umdjs/umd) wrapper, so it can be used with any AMD module loader, nodejs `require()` or without any.
+
+> Note: MessagePortDispatcher distribution package contains `dist/` folder with package wrapped into [UMD](https://github.com/umdjs/umd) wrapper, so it can be used with any AMD module loader, nodejs `require()` or without any.
+
 To start using EventDispatcher, just instantiate it
 ```javascript
 var dispatcher = new MessagePortDispatcher(iframe.contentWindow);
@@ -28,7 +28,7 @@ As first argument its constructor accepts object that implements messaging metho
 
  - [postMessage(message:Object)](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort/postMessage)
  - [addEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
- - [removeEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener)  
+ - [removeEventDispatcher(type:String, handler:Function)](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener)
 
 Window object or Dedicated Worker can be used, to communicate with other side of communication channel(send event to script in IFRAME or from IFRAME or to Worker).  To have custom events working on both sides, MessagePortDispatcher instances should be created from both sides of communication channel.
 In outer document pass IFRAME's window object
@@ -74,7 +74,7 @@ dispatcher.addEventListener('someEvent', function(event) {
 console.log('Data received', event.data);
 });
 ```
-When `MessagePortDispatcher.dispatchEvent()` called, it actually calls `postMessage()` method to pass message to other side. So instead of using `postMessage` and listening to `message` event, with MessagePortDispatcher you can send and receive custom events.  
+When `MessagePortDispatcher.dispatchEvent()` called, it actually calls `postMessage()` method to pass message to other side. So instead of using `postMessage` and listening to `message` event, with MessagePortDispatcher you can send and receive custom events.
 
 When MessagePortDispatcher instantiated, it creates two EventDispatcher's, one for incoming events and second for outgoing. Since Window object fires same `message` event for both sides, under the hood MessagePortDispatcher adds own ID to each event and if received event has same ID, it will be fired via`sender`(outgoing event) EventDispatcher, otherwise via `receiver`(incoming event).
 This will not work, event `someEvent` will be fired on other side but not for this dispatcher:
@@ -118,7 +118,7 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
  - **receiverEventPreprocessor**:Function - Optional, allows pre-processing of events and their data before firing event.
  - **senderEventPreprocessor**:Function - Optional, , allows pre-processing of events and their data before passing them to `postMessage` or `customPostMessageHandler`.
 
-#### MessagePortDispatcher instance members 
+#### MessagePortDispatcher instance members
  - **targetOrigin**:String
  - **sender**:EventDispatcher - fires outgoing events that are passed to `postMessage()`
  - **receiver**:EventDispatcher - fires incoming events received from other origin
@@ -130,12 +130,3 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
  - **removeAllEventListeners**(eventType:String):void - method copied from `receiver` EventDispatcher for easier access
  - **dispatchEvent**(event:Object):void - does not fire event, it sends event to `postMessage()`. Can be used with two arguments:
   - dispatchEvent(eventType:String, data?:Object):void
-
-#### MessagePortDispatcher static members
- - **toJSON**(data:Object):Object|String - Convers event to JSON string or if `event.data` field contains object with 'toJSON()' method, will call it and return Object with its return value.  *Methods `toJSON()` and `parse()` can be replaced with custom implementations.*
- - **parse**(data:Object|String):Object - Accepts Object or String, JSON String. If string passed, it will be converted to Object with "JSON.parse()".
- - **self**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.self, WorkerGlobalScope.self).
- - **parent**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.parent).
- - **top**(receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Creates MessagePortDispatcher using as target object value of globally available `self` variable(window.top).
- - **create**(target:MessagePort, customPostMessageHandler?:Function, receiverEventPreprocessor?:Function, senderEventPreprocessor?:Function):MessagePortDispatcher - Factory method for MessagePortDispatcher instances. Arguments list identical to MessagePortDispatcher constructor.
- - **createNoInitPrototype**():MessagePortDispatcher - Creates "husk" version of MessagePortDispatcher to use as custom classes prototype.
