@@ -5,7 +5,7 @@
 
 MessagePortDispatcher is extended API for cross-origin communication. It utilizes [MessagePort API](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) available on `window` object to send custom events into/from &lt;IFRAME/&gt; or other target that implements MessagePort interface. MessagePortDispatcher uses two [EventDispatcher's](https://github.com/burdiuz/js-event-dispatcher) for incoming and outgoing events internally.  
 
-[Demo with two &lt;iframe/&gt;'s talking to each other](http://burdiuz.github.io/js-messageport-event-dispatcher/index.html)
+[Demo with two &lt;iframe/&gt;'s talking to each other](http://burdiuz.github.io/js-messageport-event-dispatcher/)
 
 ## Installation
 Easy to install with [npm](https://www.npmjs.com/) package manager
