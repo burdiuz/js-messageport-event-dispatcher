@@ -3,8 +3,9 @@
 [![Build Status](https://travis-ci.org/burdiuz/js-messageport-event-dispatcher.svg?branch=master)](https://travis-ci.org/burdiuz/js-messageport-event-dispatcher)
 [![Coverage Status](https://coveralls.io/repos/github/burdiuz/js-messageport-event-dispatcher/badge.svg?branch=master)](https://coveralls.io/github/burdiuz/js-messageport-event-dispatcher?branch=master)
 
-MessagePortDispatcher is extended API for cross-origin communication. It utilizes [MessagePort API](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) available on `window` object to send custom events into/from &lt;IFRAME/&gt; or other target that implements MessagePort interface. MessagePortDispatcher uses two [EventDispatcher's](https://github.com/burdiuz/js-event-dispatcher) for incoming and outgoing events internally.
+MessagePortDispatcher is extended API for cross-origin communication. It utilizes [MessagePort API](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) available on `window` object to send custom events into/from &lt;IFRAME/&gt; or other target that implements MessagePort interface. MessagePortDispatcher uses two [EventDispatcher's](https://github.com/burdiuz/js-event-dispatcher) for incoming and outgoing events internally.  
 
+[Demo with two &lt;iframe/&gt;'s talking to each other](http://burdiuz.github.io/js-messageport-event-dispatcher/index.html)
 
 ## Installation
 Easy to install with [npm](https://www.npmjs.com/) package manager
@@ -129,4 +130,4 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
  - **removeEventListener**(eventType:String, listener:Function):void - method copied from `receiver` EventDispatcher for easier access
  - **removeAllEventListeners**(eventType:String):void - method copied from `receiver` EventDispatcher for easier access
  - **dispatchEvent**(event:Object):void - does not fire event, it sends event to `postMessage()`. Can be used with two arguments:
-  - dispatchEvent(eventType:String, data?:Object):void
+ - - dispatchEvent(eventType:String, data?:Object):void
