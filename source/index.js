@@ -6,12 +6,14 @@ import {
   getForTop,
   createMessagePortDispatcher,
 } from './MessagePortDispatcher';
-import { MessagePortEvent } from './MessagePortEvent';
+import { MessagePortEvent, isMessagePortEvent, parseMessagePortEvent } from './MessagePortEvent';
 
 export default MessagePortDispatcher;
 export {
   MessagePortDispatcher,
   MessagePortEvent,
+  isMessagePortEvent,
+  parseMessagePortEvent,
   factory,
   getForSelf,
   getForParent,

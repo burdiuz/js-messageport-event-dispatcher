@@ -167,12 +167,14 @@ const getForSelf = factory(() => self);
 const getForParent = factory(() => parent);
 const getForTop = factory(() => top);
 
-exports.default = MessagePortDispatcher;
 exports.MessagePortDispatcher = MessagePortDispatcher;
 exports.MessagePortEvent = MessagePortEvent;
-exports.factory = factory;
-exports.getForSelf = getForSelf;
-exports.getForParent = getForParent;
-exports.getForTop = getForTop;
 exports.createMessagePortDispatcher = createMessagePortDispatcher;
+exports.default = MessagePortDispatcher;
+exports.factory = factory;
+exports.getForParent = getForParent;
+exports.getForSelf = getForSelf;
+exports.getForTop = getForTop;
+exports.isMessagePortEvent = isMessagePortEvent;
+exports.parseMessagePortEvent = parseMessagePortEvent;
 //# sourceMappingURL=index.js.map

@@ -1,11 +1,11 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.MessagePortDispatcher = {})));
-}(this, (function (exports) { 'use strict';
+	(global = global || self, factory(global.MessagePortDispatcher = {}));
+}(this, function (exports) { 'use strict';
 
 	function unwrapExports (x) {
-		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
+		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 	}
 
 	function createCommonjsModule(fn, module) {
@@ -496,16 +496,18 @@
 	const getForParent = factory(() => parent);
 	const getForTop = factory(() => top);
 
-	exports.default = MessagePortDispatcher;
 	exports.MessagePortDispatcher = MessagePortDispatcher;
 	exports.MessagePortEvent = MessagePortEvent;
-	exports.factory = factory;
-	exports.getForSelf = getForSelf;
-	exports.getForParent = getForParent;
-	exports.getForTop = getForTop;
 	exports.createMessagePortDispatcher = createMessagePortDispatcher;
+	exports.default = MessagePortDispatcher;
+	exports.factory = factory;
+	exports.getForParent = getForParent;
+	exports.getForSelf = getForSelf;
+	exports.getForTop = getForTop;
+	exports.isMessagePortEvent = isMessagePortEvent;
+	exports.parseMessagePortEvent = parseMessagePortEvent;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=messageport-dispatcher.js.map
