@@ -1,3 +1,4 @@
+import { MessagePortTarget } from './MessagePortTarget';
 import {
   MessagePortDispatcher,
   factory,
@@ -10,6 +11,7 @@ import { MessagePortEvent, isMessagePortEvent, parseMessagePortEvent } from './M
 
 export default MessagePortDispatcher;
 export {
+  MessagePortTarget,
   MessagePortDispatcher,
   MessagePortEvent,
   isMessagePortEvent,
