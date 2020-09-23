@@ -1,7 +1,6 @@
 import { MessagePortTarget } from './MessagePortTarget';
 import {
   MessagePortDispatcher,
-  factory,
   getForSelf,
   getForParent,
   getForTop,
@@ -16,7 +15,6 @@ export {
   MessagePortEvent,
   isMessagePortEvent,
   parseMessagePortEvent,
-  factory,
   getForSelf,
   getForParent,
   getForTop,

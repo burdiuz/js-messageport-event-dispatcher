@@ -32,5 +32,3 @@ export const parseMessagePortEvent = (object) => {
 
   return null;
 };
-
-export default MessagePortEvent;

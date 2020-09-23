@@ -28,3 +28,5 @@ export class MessagePortTarget {
     this.receiver.forEach((item) => item.removeEventListener(type, handler));
   }
 }
+
+export default MessagePortTarget;

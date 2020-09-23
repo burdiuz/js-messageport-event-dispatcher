@@ -99,7 +99,7 @@ export const createMessagePortDispatcher = (
     senderEventPreprocessor,
   );
 
-export const factory = (getTarget, dispatcher = null) => () => {
+const factory = (getTarget, dispatcher = null) => () => {
   if (!dispatcher) {
     dispatcher = createMessagePortDispatcher(getTarget());
   }
@@ -112,5 +112,3 @@ export const getForSelf = factory(() => self);
 export const getForParent = factory(() => parent);
 
 export const getForTop = factory(() => top);
-
-export default MessagePortDispatcher;

@@ -2,10 +2,45 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
 var eventDispatcher = require('@actualwave/event-dispatcher');
-var hasOwn = _interopDefault(require('@actualwave/has-own'));
+var hasOwn = require('@actualwave/has-own');
+
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+var hasOwn__default = /*#__PURE__*/_interopDefaultLegacy(hasOwn);
+
+class MessagePortTarget {
+  constructor(sender, receiver) {
+    this.sender = sender || [];
+    this.receiver = receiver || [];
+
+    if (!(this.sender instanceof Array)) {
+      this.sender = [this.sender];
+    }
+
+    if (!(this.receiver instanceof Array)) {
+      this.receiver = [this.receiver];
+    }
+  }
+  /*
+    @param data
+    @param origin
+  */
+
+
+  postMessage(...args) {
+    this.sender.forEach(item => item.postMessage(...args));
+  }
+
+  addEventListener(type, handler) {
+    this.receiver.forEach(item => item.addEventListener(type, handler));
+  }
+
+  removeEventListener(type, handler) {
+    this.receiver.forEach(item => item.removeEventListener(type, handler));
+  }
+
+}
 
 /**
  * Created by Oleg Galaburda on 09.02.16.
@@ -65,7 +100,7 @@ class MessagePortEvent {
   }
 
 }
-const isMessagePortEvent = object => eventDispatcher.isObject(object) && hasOwn(object, 'dispatcherId') && hasOwn(object, 'event');
+const isMessagePortEvent = object => eventDispatcher.isObject(object) && hasOwn__default['default'](object, 'dispatcherId') && hasOwn__default['default'](object, 'event');
 const parseMessagePortEvent = object => {
   const result = parseRawData(object);
 
@@ -156,6 +191,7 @@ class MessagePortDispatcher {
 
 }
 const createMessagePortDispatcher = (target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor) => new MessagePortDispatcher(target, customPostMessageHandler, receiverEventPreprocessor, senderEventPreprocessor);
+
 const factory = (getTarget, dispatcher = null) => () => {
   if (!dispatcher) {
     dispatcher = createMessagePortDispatcher(getTarget());
@@ -163,15 +199,16 @@ const factory = (getTarget, dispatcher = null) => () => {
 
   return dispatcher;
 };
+
 const getForSelf = factory(() => self);
 const getForParent = factory(() => parent);
 const getForTop = factory(() => top);
 
 exports.MessagePortDispatcher = MessagePortDispatcher;
 exports.MessagePortEvent = MessagePortEvent;
+exports.MessagePortTarget = MessagePortTarget;
 exports.createMessagePortDispatcher = createMessagePortDispatcher;
 exports.default = MessagePortDispatcher;
-exports.factory = factory;
 exports.getForParent = getForParent;
 exports.getForSelf = getForSelf;
 exports.getForTop = getForTop;
