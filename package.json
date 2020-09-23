@@ -1,7 +1,7 @@
 {
   "name": "@actualwave/messageport-dispatcher",
   "description": "Cross-domain EventDispatcher for MessagePort interface",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "main": "index.js",
   "keywords": [
     "event",

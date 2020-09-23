@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/burdiuz/js-messageport-event-dispatcher.svg?branch=master)](https://travis-ci.org/burdiuz/js-messageport-event-dispatcher)
 [![Coverage Status](https://coveralls.io/repos/github/burdiuz/js-messageport-event-dispatcher/badge.svg?branch=master)](https://coveralls.io/github/burdiuz/js-messageport-event-dispatcher?branch=master)
 
-MessagePortDispatcher is extended API for cross-origin communication. It utilizes [MessagePort API](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) available on `window` object to send custom events into/from &lt;IFRAME/&gt; or other target that implements MessagePort interface. MessagePortDispatcher uses two [EventDispatcher's](https://github.com/burdiuz/js-event-dispatcher) for incoming and outgoing events internally.  
+MessagePortDispatcher is extended API for cross-origin communication. It utilizes [MessagePort API](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) available on `window` object to send custom events into/from &lt;IFRAME/&gt; or other target that implements MessagePort interface. MessagePortDispatcher uses two [EventDispatcher's](https://github.com/burdiuz/js-event-dispatcher) for incoming and outgoing events internally.
 
 [Demo with two &lt;iframe/&gt;'s talking to each other](http://burdiuz.github.io/js-messageport-event-dispatcher/)
 
@@ -23,7 +23,7 @@ yarn add @actualwave/messageport-dispatcher
 
 To start using EventDispatcher, just instantiate it
 ```javascript
-var dispatcher = new MessagePortDispatcher(iframe.contentWindow);
+const dispatcher = new MessagePortDispatcher(iframe.contentWindow);
 ```
 As first argument its constructor accepts object that implements messaging methods of [MessagePort](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) interface.
 
@@ -34,35 +34,35 @@ As first argument its constructor accepts object that implements messaging metho
 Window object or Dedicated Worker can be used, to communicate with other side of communication channel(send event to script in IFRAME or from IFRAME or to Worker).  To have custom events working on both sides, MessagePortDispatcher instances should be created from both sides of communication channel.
 In outer document pass IFRAME's window object
 ```javascript
-var frameDispatcher = new MessagePortDispatcher(iframeNode.contentWindow);
-frameDispatcher.addEventListener('initialized', function() {
+const frameDispatcher = new MessagePortDispatcher(iframeNode.contentWindow);
+frameDispatcher.addEventListener('initialized', () => {
 	console.log('Ok, we can start communication.');
 });
 ```
 In IFRAME use `window.self`
 ```javascript
-var dispatcher = MessagePortDispatcher.self();
+const dispatcher = MessagePortDispatcher.self();
 dispatcher.dispatchEvent('initialized');
 ```
 Instances returned from `MessagePortDispatcher.self()`, `MessagePortDispatcher.parent()` and `MessagePortDispatcher.top()` are cached internally, so will always return same instance.
 
 Its possible to write an adapter for any object and pass it into MessagePortDispatcher
 ```javascript
-var target = {
-	postMessage: function(data, origin) {
+const target = {
+	postMessage: (data, origin) => {
 		console.log('Message sent', data);
 		window.postMessage(data, origin);
 	},
-	addEventListener: function(eventType, handler) {
+	addEventListener: (eventType, handler) => {
 		console.log('Event listener added to ', eventType);
 		window.addEventListener(eventType, handler);
 	},
-	removeEventListener: function(eventType, handler) {
+	removeEventListener: (eventType, handler) => {
 		console.log('Event listener removed from ', eventType);
 		window.removeEventListener(eventType, handler);
 	}
 };
-var dispatcher = new MessagePortDispatcher(target);
+const dispatcher = new MessagePortDispatcher(target);
 ```
 
 Once its instance was created, you can send events into `iframe`
@@ -71,7 +71,7 @@ dispatcher.dispatchEvent('someEvent', {someData: 'anything here'});
 ```
 and catch it on other side
 ```javascript
-dispatcher.addEventListener('someEvent', function(event) {
+dispatcher.addEventListener('someEvent', (event) => {
 console.log('Data received', event.data);
 });
 ```
@@ -80,14 +80,14 @@ When `MessagePortDispatcher.dispatchEvent()` called, it actually calls `postMess
 When MessagePortDispatcher instantiated, it creates two EventDispatcher's, one for incoming events and second for outgoing. Since Window object fires same `message` event for both sides, under the hood MessagePortDispatcher adds own ID to each event and if received event has same ID, it will be fired via`sender`(outgoing event) EventDispatcher, otherwise via `receiver`(incoming event).
 This will not work, event `someEvent` will be fired on other side but not for this dispatcher:
 ```javascript
-dispatcher.addEventListener('someEvent', function(){
+dispatcher.addEventListener('someEvent', () => {
 	console.log('Some Event Received!');
 });
 dispatcher.dispatchEvent('someEvent');
 ```
 If you want to listen for outgoing events, use `sender`:
 ```javascript
-dispatcher.sender.addEventListener('someEvent', function(){
+dispatcher.sender.addEventListener('someEvent', () => {
 	console.log('Some Event Received!');
 });
 dispatcher.dispatchEvent('someEvent');
@@ -97,8 +97,8 @@ Using same event types on both sides of communication channel will not mix them,
 MessagePortDispatcher has exposed methods from `receiver` EventDispatcher for easier usage and custom `dispatchEvent()` method that sends events using `MessagePort.postMessage()`.
 These two calls are equivalent:
 ```javascript
-dispatcher.addEventListener('someEvent', function(){});
-dispatcher.receiver.addEventListener('someEvent', function(){});
+dispatcher.addEventListener('someEvent', () => {});
+dispatcher.receiver.addEventListener('someEvent', () => {});
 ```
 But these lines do different things:
 ```javascript
@@ -131,3 +131,17 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
  - **removeAllEventListeners**(eventType:String):void - method copied from `receiver` EventDispatcher for easier access
  - **dispatchEvent**(event:Object):void - does not fire event, it sends event to `postMessage()`. Can be used with two arguments:
  - - dispatchEvent(eventType:String, data?:Object):void
+
+#### MessagePortTarget
+A class that is used as a surrogate target for MessagePortDispatcher, it is useful when you have two objects for sending and receiving messages. For example, when you have an iframe with content from another origin and you can set iframe.contentWindow as sender object and own window as receiver. Sender object must contain `postMessage()` method and receiver object -- `addEventListener()` and `removeEventListener()` methods. Pass both sender and receiver into MessagePortTarget constructor, then it's instance can be provided for MessagePortDispatcher.
+```
+const frameDispatcher = new MessagePortDispatcher(new MessagePortTarget(iframeNode.contentWindow, window));
+```
+It also accepts lists of senders and receivers for mass sending and receiving.
+```
+const frameDispatcher = new MessagePortDispatcher(new MessagePortTarget([
+  iframe1.contentWindow,
+  iframe2.contentWindow,
+  iframe3.contentWindow
+  ], window));
+```
