@@ -134,11 +134,11 @@ Project contains example in `example` folder, it shows how to use MessagePortDis
 
 #### MessagePortTarget
 A class that is used as a surrogate target for MessagePortDispatcher, it is useful when you have two objects for sending and receiving messages. For example, when you have an iframe with content from another origin and you can set iframe.contentWindow as sender object and own window as receiver. Sender object must contain `postMessage()` method and receiver object -- `addEventListener()` and `removeEventListener()` methods. Pass both sender and receiver into MessagePortTarget constructor, then it's instance can be provided for MessagePortDispatcher.
-```
+```javascript
 const frameDispatcher = new MessagePortDispatcher(new MessagePortTarget(iframeNode.contentWindow, window));
 ```
 It also accepts lists of senders and receivers for mass sending and receiving.
-```
+```javascript
 const frameDispatcher = new MessagePortDispatcher(new MessagePortTarget([
   iframe1.contentWindow,
   iframe2.contentWindow,
