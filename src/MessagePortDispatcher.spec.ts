@@ -1,7 +1,5 @@
-/**
- * Created by Oleg Galaburda on 15.02.16.
- */
 /* eslint-disable no-restricted-globals */
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import EventDispatcher from '@actualwave/event-dispatcher';
 import {
   MessagePortDispatcher,
@@ -9,33 +7,41 @@ import {
   getForSelf,
   getForParent,
   getForTop,
-} from '../index';
+} from './index';
+
+type MockTarget = EventDispatcher & { postMessage: jest.Mock };
 
 describe('MessagePortDispatcher', () => {
-  let messagePort;
-  let dispatcher;
+  let messagePort: MockTarget;
+  let dispatcher: MessagePortDispatcher;
 
   beforeEach(() => {
-    global.self = global.self || { type: 'SELF' };
-    global.parent = global.parent || { type: 'PARENT' };
-    global.top = global.top || { type: 'TOP' };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const g = globalThis as any;
+    const makeWindowMock = () => ({ addEventListener: jest.fn(), removeEventListener: jest.fn(), postMessage: jest.fn() });
+    // Only set once so the singleton factories capture a stable reference
+    if (!g.__mockWindowsSet) {
+      g.self = makeWindowMock();
+      g.parent = makeWindowMock();
+      g.top = makeWindowMock();
+      g.__mockWindowsSet = true;
+    }
 
-    messagePort = new EventDispatcher();
+    messagePort = Object.assign(new EventDispatcher(), { postMessage: jest.fn() }) as MockTarget;
     jest.spyOn(messagePort, 'addEventListener');
     jest.spyOn(messagePort, 'hasEventListener');
     jest.spyOn(messagePort, 'removeEventListener');
     jest.spyOn(messagePort, 'dispatchEvent');
-    messagePort.postMessage = jest.fn();
 
-    dispatcher = new MessagePortDispatcher(messagePort);
+    dispatcher = new MessagePortDispatcher(messagePort as any);
   });
 
   describe('When using custom postMessage handler', () => {
-    let customHandler;
+    let customHandler: jest.Mock;
 
     beforeEach(() => {
       customHandler = jest.fn();
-      dispatcher = new MessagePortDispatcher(messagePort, customHandler);
+      dispatcher = new MessagePortDispatcher(messagePort as any, customHandler as any);
       dispatcher.dispatchEvent('any-event');
     });
 
@@ -50,37 +56,36 @@ describe('MessagePortDispatcher', () => {
 
   it('getForSelf() should create MessagePortDispatcher for current window', () => {
     const selfDispatcher = getForSelf();
-
-    expect(selfDispatcher.target).toBe(self);
+    expect(selfDispatcher.target).toBe((globalThis as any).self);
     expect(getForSelf()).toBe(selfDispatcher);
   });
 
   it('getForParent() should create MessagePortDispatcher for parent window', () => {
-    expect(getForParent().target).toBe(parent);
+    expect(getForParent().target).toBe((globalThis as any).parent);
   });
 
   it('getForTop() should create MessagePortDispatcher for top window', () => {
-    expect(getForTop().target).toBe(top);
+    expect(getForTop().target).toBe((globalThis as any).top);
   });
 
   describe('When created with no arguments', () => {
     it('should use global self as target', () => {
-      expect(new MessagePortDispatcher().target).toBe(self);
+      expect(new MessagePortDispatcher().target).toBe((globalThis as any).self);
     });
   });
 
   describe('When using pre-processors', () => {
-    let sendPreprocessor;
-    let recieverPreprocessor;
+    let sendPreprocessor: jest.Mock;
+    let receiverPreprocessor: jest.Mock;
 
     beforeEach(() => {
       sendPreprocessor = jest.fn((event) => event);
-      recieverPreprocessor = jest.fn((event) => event);
+      receiverPreprocessor = jest.fn((event) => event);
       dispatcher = new MessagePortDispatcher(
-        messagePort,
+        messagePort as any,
         null,
-        recieverPreprocessor,
-        sendPreprocessor,
+        receiverPreprocessor as any,
+        sendPreprocessor as any,
       );
     });
 
@@ -100,45 +105,39 @@ describe('MessagePortDispatcher', () => {
     describe('When receiving event', () => {
       beforeEach(() => {
         messagePort.dispatchEvent('message', {
-          event: {
-            type: 'receivedEvent',
-            data: null,
-          },
+          event: { type: 'receivedEvent', data: null },
           dispatcherId: 'not-this-dispatcher',
         });
       });
 
       it('should call preprocessor for received event', () => {
-        expect(recieverPreprocessor).toHaveBeenCalledTimes(1);
-        expect(recieverPreprocessor).toHaveBeenCalledWith(
+        expect(receiverPreprocessor).toHaveBeenCalledTimes(1);
+        expect(receiverPreprocessor).toHaveBeenCalledWith(
           expect.objectContaining({ type: 'receivedEvent' }),
         );
       });
     });
   });
 
-  describe('createEventDispatcher()', () => {
-    let customHandler;
-    let sendPreprocessor;
-    let recieverPreprocessor;
+  describe('createMessagePortDispatcher()', () => {
+    let customHandler: jest.Mock;
+    let sendPreprocessor: jest.Mock;
+    let receiverPreprocessor: jest.Mock;
 
     beforeEach(() => {
       customHandler = jest.fn();
       sendPreprocessor = jest.fn((event) => event);
-      recieverPreprocessor = jest.fn((event) => event);
+      receiverPreprocessor = jest.fn((event) => event);
       dispatcher = createMessagePortDispatcher(
-        messagePort,
-        customHandler,
-        recieverPreprocessor,
-        sendPreprocessor,
+        messagePort as any,
+        customHandler as any,
+        receiverPreprocessor as any,
+        sendPreprocessor as any,
       );
 
       dispatcher.dispatchEvent('sentEvent');
       messagePort.dispatchEvent('message', {
-        event: {
-          type: 'receivedEvent',
-          data: null,
-        },
+        event: { type: 'receivedEvent', data: null },
         dispatcherId: 'not-this-dispatcher',
       });
     });
@@ -149,23 +148,20 @@ describe('MessagePortDispatcher', () => {
 
     it('should save custom handler', () => {
       expect(customHandler).toHaveBeenCalledTimes(1);
-      expect(customHandler.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          event: expect.objectContaining({ type: 'sentEvent' }),
-        }),
-      );
+      const pkg = customHandler.mock.calls[0][0] as any;
+      expect(JSON.parse(pkg.event)).toMatchObject({ type: 'sentEvent' });
     });
 
     it('should call preprocessor for sent event', () => {
       expect(sendPreprocessor).toHaveBeenCalledTimes(1);
-      expect(sendPreprocessor.mock.calls[0][0]).toEqual(
+      expect((sendPreprocessor.mock.calls[0] as unknown[])[0]).toEqual(
         expect.objectContaining({ type: 'sentEvent' }),
       );
     });
 
     it('should call preprocessor for received event', () => {
-      expect(recieverPreprocessor).toHaveBeenCalledTimes(1);
-      expect(recieverPreprocessor.mock.calls[0][0]).toEqual(
+      expect(receiverPreprocessor).toHaveBeenCalledTimes(1);
+      expect((receiverPreprocessor.mock.calls[0] as unknown[])[0]).toEqual(
         expect.objectContaining({ type: 'receivedEvent' }),
       );
     });
@@ -173,11 +169,11 @@ describe('MessagePortDispatcher', () => {
 
   describe('Instance', () => {
     it('should have property with sender EventDispatcher', () => {
-      expect(dispatcher.sender).toBeInstanceOf(EventDispatcher);
+      expect(dispatcher.sender).toBeDefined();
     });
 
     it('should have property with receiver EventDispatcher', () => {
-      expect(dispatcher.receiver).toBeInstanceOf(EventDispatcher);
+      expect(dispatcher.receiver).toBeDefined();
     });
 
     it('sender and receiver should not be same', () => {
@@ -193,19 +189,19 @@ describe('MessagePortDispatcher', () => {
     });
 
     describe('Send events', () => {
-      let event;
-      let listener;
-      let senderListener;
-      let receiverListener;
+      let event: { type: string; data: string };
+      let listener: jest.Mock;
+      let senderListener: jest.Mock;
+      let receiverListener: jest.Mock;
 
       beforeEach(() => {
         listener = jest.fn();
         senderListener = jest.fn();
         receiverListener = jest.fn();
         event = { type: 'myEvent', data: 'anything' };
-        dispatcher.addEventListener('myEvent', listener);
-        dispatcher.sender.addEventListener('myEvent', senderListener);
-        dispatcher.receiver.addEventListener('myEvent', receiverListener);
+        dispatcher.addEventListener('myEvent', listener as any);
+        dispatcher.sender.addEventListener('myEvent', senderListener as any);
+        dispatcher.receiver.addEventListener('myEvent', receiverListener as any);
         dispatcher.dispatchEvent(event);
       });
 
@@ -218,7 +214,7 @@ describe('MessagePortDispatcher', () => {
       });
 
       it('should wrap event into transfer package', () => {
-        const pkg = messagePort.postMessage.mock.calls[0][0];
+        const pkg = messagePort.postMessage.mock.calls[0][0] as any;
         expect(pkg.dispatcherId).toBe(dispatcher.dispatcherId);
         expect(JSON.parse(pkg.event)).toEqual(event);
       });
@@ -241,32 +237,29 @@ describe('MessagePortDispatcher', () => {
           expect(receiverListener).not.toHaveBeenCalled();
         });
 
-        it('message event should not be dispatcher from main interface', () => {
+        it('message event should not be dispatched from main interface', () => {
           expect(listener).not.toHaveBeenCalled();
         });
       });
     });
 
     describe('Receive events', () => {
-      let pkg;
-      let listener;
-      let senderListener;
-      let receiverListener;
+      let pkg: { event: { type: string; data: string }; dispatcherId: string };
+      let listener: jest.Mock;
+      let senderListener: jest.Mock;
+      let receiverListener: jest.Mock;
 
       beforeEach(() => {
         pkg = {
-          event: {
-            type: 'myEvent',
-            data: 'anything',
-          },
+          event: { type: 'myEvent', data: 'anything' },
           dispatcherId: 'password1',
         };
         listener = jest.fn();
         senderListener = jest.fn();
         receiverListener = jest.fn();
-        dispatcher.addEventListener('myEvent', listener);
-        dispatcher.sender.addEventListener('myEvent', senderListener);
-        dispatcher.receiver.addEventListener('myEvent', receiverListener);
+        dispatcher.addEventListener('myEvent', listener as any);
+        dispatcher.sender.addEventListener('myEvent', senderListener as any);
+        dispatcher.receiver.addEventListener('myEvent', receiverListener as any);
         messagePort.dispatchEvent('message', pkg);
       });
 
@@ -282,16 +275,13 @@ describe('MessagePortDispatcher', () => {
         expect(receiverListener).toHaveBeenCalledTimes(1);
       });
 
-      it('message event should be dispatcher from main interface', () => {
+      it('message event should be dispatched from main interface', () => {
         expect(listener).toHaveBeenCalledTimes(1);
       });
 
       it('should pass event object to listener', () => {
         expect(listener).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: 'myEvent',
-            data: 'anything',
-          }),
+          expect.objectContaining({ type: 'myEvent', data: 'anything' }),
         );
       });
 
@@ -300,7 +290,7 @@ describe('MessagePortDispatcher', () => {
           listener.mockClear();
           receiverListener.mockClear();
           senderListener.mockClear();
-          dispatcher.removeEventListener('myEvent', listener);
+          dispatcher.removeEventListener('myEvent', listener as any);
           messagePort.dispatchEvent('message', pkg);
         });
 

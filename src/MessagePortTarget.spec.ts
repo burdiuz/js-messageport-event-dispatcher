@@ -1,12 +1,10 @@
-import { MessagePortTarget } from '../MessagePortTarget';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { MessagePortTarget } from './MessagePortTarget';
 
 describe('MessagePortTarget', () => {
-  let instance;
+  let instance: MessagePortTarget;
 
-  const makeSender = () => ({
-    postMessage: jest.fn(),
-  });
-
+  const makeSender = () => ({ postMessage: jest.fn() });
   const makeReceiver = () => ({
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
@@ -15,11 +13,9 @@ describe('MessagePortTarget', () => {
   const listenerAdd = () => {};
   const listenerRemove = () => {};
 
-  beforeEach(() => {});
-
   describe('When having receiver and sender', () => {
-    let receiver;
-    let sender;
+    let receiver: ReturnType<typeof makeReceiver>;
+    let sender: ReturnType<typeof makeSender>;
 
     beforeEach(() => {
       sender = makeSender();
@@ -48,7 +44,7 @@ describe('MessagePortTarget', () => {
   });
 
   describe('When having receivers only', () => {
-    let receiver;
+    let receiver: ReturnType<typeof makeReceiver>;
 
     beforeEach(() => {
       receiver = makeReceiver();
@@ -58,7 +54,7 @@ describe('MessagePortTarget', () => {
       instance.removeEventListener('message', listenerRemove);
     });
 
-    it('should not throw error on posting mesage', () => {
+    it('should not throw error on posting message', () => {
       expect(() => {
         instance.postMessage('my data', '*');
       }).not.toThrow();
@@ -76,7 +72,7 @@ describe('MessagePortTarget', () => {
   });
 
   describe('When having senders only', () => {
-    let sender;
+    let sender: ReturnType<typeof makeSender>;
 
     beforeEach(() => {
       sender = makeSender();
@@ -99,8 +95,8 @@ describe('MessagePortTarget', () => {
   });
 
   describe('When having multiple receivers and senders', () => {
-    let receiver;
-    let sender;
+    let receiver: ReturnType<typeof makeReceiver>;
+    let sender: ReturnType<typeof makeSender>;
 
     beforeEach(() => {
       sender = makeSender();

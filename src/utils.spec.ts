@@ -1,14 +1,13 @@
-import { toRawData, parseRawData } from '../utils';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { toRawData, parseRawData } from './utils';
 
 describe('toRawData()', () => {
   describe('When toJSON is defined', () => {
-    let object;
-    let result;
+    let object: { toJSON: jest.Mock };
+    let result: unknown;
 
     beforeEach(() => {
-      object = {
-        toJSON: jest.fn(() => ({})),
-      };
+      object = { toJSON: jest.fn(() => ({})) };
       result = toRawData(object);
     });
 
@@ -22,8 +21,8 @@ describe('toRawData()', () => {
   });
 
   describe("When toJSON isn't defined", () => {
-    let object;
-    let result;
+    let object: { value: boolean; target: object; type: string };
+    let result: unknown;
 
     beforeEach(() => {
       object = { value: true, target: {}, type: 'anystring' };
@@ -35,20 +34,18 @@ describe('toRawData()', () => {
     });
 
     it('should return proper JSON', () => {
-      expect(JSON.parse(result)).toEqual(object);
+      expect(JSON.parse(result as string)).toEqual(object);
     });
   });
 });
 
-describe('parse()', () => {
+describe('parseRawData()', () => {
   it('should accept object as parameter', () => {
     expect(parseRawData({ something: '123' })).toEqual({ something: '123' });
   });
 
   it('should accept string as parameter', () => {
-    expect(parseRawData(JSON.stringify({ something: '123' }))).toEqual({
-      something: '123',
-    });
+    expect(parseRawData(JSON.stringify({ something: '123' }))).toEqual({ something: '123' });
   });
 
   describe('When data is not a valid JSON', () => {

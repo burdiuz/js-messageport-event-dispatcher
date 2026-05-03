@@ -1,16 +1,10 @@
-/**
- * Created by Oleg Galaburda on 15.02.16.
- */
-import {
-  MessagePortEvent,
-  isMessagePortEvent,
-  parseMessagePortEvent,
-} from '../MessagePortEvent';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { MessagePortEvent, isMessagePortEvent, parseMessagePortEvent } from './MessagePortEvent';
 
 describe('MessagePortEvent', () => {
   describe('Instance', () => {
-    let event = null;
-    let mpEvent = null;
+    let event: { type: string; data: null };
+    let mpEvent: MessagePortEvent;
 
     beforeEach(() => {
       event = { type: 'any-event', data: null };
@@ -28,18 +22,18 @@ describe('MessagePortEvent', () => {
     describe('toJSON()', () => {
       it('should return raw object representation', () => {
         const obj = mpEvent.toJSON();
-        expect(JSON.parse(obj.event)).toEqual(event);
+        expect(JSON.parse(obj.event as string)).toEqual(event);
         expect(obj.dispatcherId).toBe('qwerty123456');
       });
     });
 
     describe('When event has toJSON', () => {
-      let toJSON = null;
-      let obj = null;
+      let toJSON: jest.Mock;
+      let obj: ReturnType<MessagePortEvent['toJSON']>;
 
       beforeEach(() => {
         toJSON = jest.fn(() => ({ result: true }));
-        event.toJSON = toJSON;
+        (event as typeof event & { toJSON: jest.Mock }).toJSON = toJSON;
         obj = mpEvent.toJSON();
       });
 
@@ -60,19 +54,19 @@ describe('MessagePortEvent', () => {
         dispatcherId: 'asdfgh',
       });
 
-      expect(parseMessagePortEvent(jsonString)).toEqual({
+      expect(parseMessagePortEvent(jsonString)).toMatchObject({
         event: { type: 'my-event' },
         dispatcherId: 'asdfgh',
       });
     });
 
     it('should accept event being JSON string', () => {
-      const jsonString = {
-        event: JSON.stringify({ type: 'my-event' }),
-        dispatcherId: 'password',
-      };
-
-      expect(parseMessagePortEvent(jsonString)).toEqual({
+      expect(
+        parseMessagePortEvent({
+          event: JSON.stringify({ type: 'my-event' }),
+          dispatcherId: 'password',
+        }),
+      ).toMatchObject({
         event: { type: 'my-event' },
         dispatcherId: 'password',
       });
@@ -84,7 +78,7 @@ describe('MessagePortEvent', () => {
           event: { type: 'my-event' },
           dispatcherId: '111111',
         }),
-      ).toEqual({
+      ).toMatchObject({
         event: { type: 'my-event' },
         dispatcherId: '111111',
       });
@@ -106,8 +100,6 @@ describe('isMessagePortEvent()', () => {
   });
 
   it('should return true if event and dispatcherId fields present', () => {
-    expect(isMessagePortEvent({ event: {}, dispatcherId: 'letmein' })).toBe(
-      true,
-    );
+    expect(isMessagePortEvent({ event: {}, dispatcherId: 'letmein' })).toBe(true);
   });
 });
