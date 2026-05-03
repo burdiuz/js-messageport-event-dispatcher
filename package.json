@@ -101,7 +101,7 @@
     "build:watch": "rollup --config --watch",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "server": "rollup --config rollup.serve.js",
+    "serve": "rollup --config rollup.serve.js",
     "test": "jest --colors",
     "test:watch": "jest --colors --watch",
     "prepare": "husky",
